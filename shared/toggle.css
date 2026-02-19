@@ -40,3 +40,21 @@
 .theme-label.fade {
   opacity: 0;
 }
+
+
+/* DEFAULT (LIGHT MODE): SHOW MOON, HIDE SUN */
+/* (BECAUSE THE BUTTON SAYS "DARK" TO SWITCH TO DARK) */
+
+.icon-sun { display: none; }
+.icon-moon { display: inline-block; }
+
+/* DARK MODE: SHOW SUN, HIDE MOON */
+[data-theme="dark"] .icon-sun { display: inline-block; }
+[data-theme="dark"] .icon-moon { display: none; }
+
+/* OPTIONAL: ALIGNMENT FIX */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
