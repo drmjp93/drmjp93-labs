@@ -60,7 +60,11 @@ main {
   padding: 22px;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
   opacity: 0;
   animation: fadeIn 0.5s ease forwards;
 }
