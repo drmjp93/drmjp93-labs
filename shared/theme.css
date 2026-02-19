@@ -1,19 +1,23 @@
 :root {
   --bg: #ffffff;
-  --card: #f3f4f6;
-  --border: #e5e7eb;
+  --card: #ffffff;
+  --border: #d1d5db;
   --text: #111827;
-  --muted: #6b7280;
-  --accent: #2563eb;
+  --muted: #4b5563;
+
+  --accent: #ea580c;           /* bright orange for light */
+  --accent-contrast: #ffffff;  /* text on accent */
 }
 
 [data-theme="dark"] {
   --bg: #0f1115;
   --card: #161a21;
-  --border: #262a33;
+  --border: #2c323c;
   --text: #e5e7eb;
   --muted: #9ca3af;
-  --accent: #22d3ee;
+
+  --accent: #22d3ee;           /* cyan for dark */
+  --accent-contrast: #0f1115;
 }
 
 html {
