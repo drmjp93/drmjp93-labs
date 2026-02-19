@@ -67,8 +67,15 @@ main {
 
 .card:hover {
   transform: translateY(-4px);
+  background: var(--accent);
   border-color: var(--accent);
+  color: var(--accent-contrast);
 }
+
+.card:hover .card-desc {
+  color: var(--accent-contrast);
+}
+
 
 .card-title {
   font-weight: 600;
