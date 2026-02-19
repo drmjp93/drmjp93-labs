@@ -31,24 +31,28 @@
 
     applyTheme(getPreferredTheme());
     updateLabel();
+    
+// FIND THIS SECTION IN YOUR theme.js
+if (toggleBtn) {
+  toggleBtn.addEventListener("click", function () {
+    const iconContainer = document.querySelector(".theme-icon-container"); // ADD THIS
+    
+    label.classList.add("fade");
+    if (iconContainer) iconContainer.classList.add("fade"); // ADD THIS
 
-    if (toggleBtn) {
-      toggleBtn.addEventListener("click", function () {
-        label.classList.add("fade");
+    setTimeout(() => {
+      const current = getCurrentTheme();
+      const next = current === "dark" ? "light" : "dark";
 
-        setTimeout(() => {
-          const current = getCurrentTheme();
-          const next = current === "dark" ? "light" : "dark";
+      localStorage.setItem(storageKey, next);
+      applyTheme(next);
+      updateLabel();
 
-          localStorage.setItem(storageKey, next);
-          applyTheme(next);
-          updateLabel();
-
-          label.classList.remove("fade");
-        }, 150);
-      });
-    }
-
+      label.classList.remove("fade");
+      if (iconContainer) iconContainer.classList.remove("fade"); // ADD THIS
+    }, 150);
+  });
+}
     function updateLabel() {
       const current = getCurrentTheme();
       label.textContent = current === "dark" ? "Light" : "Dark";
