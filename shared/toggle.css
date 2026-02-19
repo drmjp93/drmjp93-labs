@@ -41,10 +41,8 @@
   opacity: 0;
 }
 
-
 /* DEFAULT (LIGHT MODE): SHOW MOON, HIDE SUN */
 /* (BECAUSE THE BUTTON SAYS "DARK" TO SWITCH TO DARK) */
-
 .icon-sun { display: none; }
 .icon-moon { display: inline-block; }
 
@@ -57,4 +55,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  
+}/* ADD THIS TO toggle.css */
+.theme-icon-container {
+  display: inline-flex;
+  transition: opacity 0.25s ease, transform 0.25s ease; /* MATCH THE LABEL TRANSITION */
+}
+
+.theme-icon-container.fade {
+  opacity: 0;
+  transform: scale(0.8); /* OPTIONAL: ADDS A SUBTLE SHRINK EFFECT DURING FADE */
 }
