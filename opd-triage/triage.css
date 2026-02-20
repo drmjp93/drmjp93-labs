@@ -166,3 +166,21 @@
     align-items: flex-start;
   }
 }
+/* --- Mobile Header Fix --- */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px; /* Adds breathing room below the title */
+  }
+  
+  .action-buttons-group {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .theme-toggle {
+    position: static !important; /* Stops the button from floating away */
+  }
+}
