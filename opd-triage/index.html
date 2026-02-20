@@ -14,17 +14,20 @@
   <script src="triage.js" defer></script>
 </head>
 <body>
-  <main>
+  <main class="triage-main">
+    <div class="top-nav">
+      <a href="/" class="back-btn">&larr; Back to Labs</a>
+    </div>
+
     <div class="header">
       <div>
-        <a href="/" style="text-decoration: none; color: var(--accent); font-size: 0.9rem; margin-bottom: 8px; display: inline-block;">&larr; Back to Labs</a>
         <div class="title" id="page-title">OPD Triage System</div>
         <div class="subtitle" id="page-subtitle">Tap symptoms to assign department</div>
       </div>
 
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <button class="theme-toggle" id="lang-toggle" aria-label="Toggle language">
-          <span class="theme-label" id="lang-label">ENG / ગુજ</span>
+      <div class="action-buttons-group">
+        <button class="lang-btn" id="lang-toggle" aria-label="Toggle language">
+          <span class="lang-label" id="lang-label">ENG / ગુજ</span>
         </button>
 
         <button class="theme-toggle" aria-label="Toggle theme">
@@ -37,22 +40,20 @@
       </div>
     </div>
 
-    <div class="triage-container">
-      <div id="pills-container" class="pills-grid">
-        </div>
+    <div class="result-card" id="result-card">
+      <h3 id="result-dept">Select Symptoms</h3>
+      <p id="result-symptoms" class="result-symptoms">No symptoms selected.</p>
+    </div>
 
-      <div class="result-card" id="result-card">
-        <div class="result-header">
-          <h3 id="result-dept">Select Symptoms</h3>
-          <button id="copy-btn" class="action-btn">Copy Summary</button>
+    <div class="triage-container">
+      <div id="pills-container">
         </div>
-        <p id="result-symptoms" class="result-symptoms">No symptoms selected.</p>
-        <button id="clear-btn" class="action-btn outline" style="margin-top: 16px; width: 100%;">Clear All</button>
-      </div>
     </div>
 
     <footer>
-      drmjp93.in · tools.drmjp93.in · labs.drmjp93.in
+      <a href="https://drmjp93.in" target="_blank" rel="noopener">drmjp93.in</a> · 
+      <a href="https://tools.drmjp93.in" target="_blank" rel="noopener">tools.drmjp93.in</a> · 
+      <a href="https://labs.drmjp93.in">labs.drmjp93.in</a>
     </footer>
   </main>
 </body>
