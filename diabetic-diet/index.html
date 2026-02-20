@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Diabetic Diet & Lab Protocol - Dr. Mit Labs</title>
+
+  <link rel="stylesheet" href="/shared/theme.css">
+  <link rel="stylesheet" href="/shared/layout.css">
+  <link rel="stylesheet" href="/shared/toggle.css">
+  <script src="/shared/theme.js" defer></script>
+
+  <link rel="stylesheet" href="diet.css">
+  <script src="diet.js" defer></script>
+</head>
+<body>
+  <main class="diet-main">
+    
+    <div class="top-nav no-print">
+      <a href="/" class="back-btn">&larr; Back to Labs</a>
+    </div>
+
+    <div class="header no-print">
+      <div>
+        <div class="title">Diabetic Resource Handout</div>
+        <div class="subtitle">Diet chart, lab instructions, and emergency info</div>
+      </div>
+
+      <div class="action-buttons-group">
+        <button id="print-btn" class="print-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print Handout
+        </button>
+
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-icon-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+          <span class="theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="print-header print-only">
+      <h2>Dr. Mit Panchani</h2>
+      <p>MBBS, MD (Medicine)</p>
+      <div class="print-meta">સમયઃ સોમવાર થી શનિવાર | સવારે 9 થી 5 સુધી</div>
+      <hr>
+      <h1>ડાયાબિટીસ: આહાર અને લેબ તપાસની માહિતી</h1>
+    </div>
+
+    <div class="section-card" id="diet-section">
+      <h3 class="section-title">ડાયાબિટીસ ડાયેટ ચાર્ટ (રોજનો આહાર)</h3>
+      
+      <div class="special-note">
+        <strong>💡 ખાસ નોંધ:</strong> રાત્રે મેથીના દાણા પાણીમાં પલાળી રાખવા અને બપોરના તથા સાંજના ભોજન સાથે એક-એક ચમચી ખાઈ લેવા.
+      </div>
+
+      <div class="timeline">
+        <div class="time-block">
+          <div class="time-label">સવારે 7:00 - 8:00</div>
+          <div class="time-content">
+            <p>એક કપ ચા / કોફી / દૂધ (ખાંડ, ગોળ કે મલાઈ વગર).</p>
+            <p>અડધી રોટલી / અડધી ભાખરી / 2 ખાખરા / સુગર ફ્રી બિસ્કિટ / ઘઉંની બ્રેડ <strong>અથવા</strong> અડધો બાજરીનો રોટલો <strong>અથવા</strong> એક વાટકી પૌંઆ.</p>
+          </div>
+        </div>
+
+        <div class="time-block">
+          <div class="time-label">સવારે 10:00 - 11:00</div>
+          <div class="time-content">
+            <p>એક વાટકી ફણગાવેલા અથવા બાફેલા ચણા / મગ / મઠ.</p>
+            <p><strong>ફળ:</strong> નારંગી / મોસંબી / સંતરા / જાંબુ / કીવી / પપૈયું.</p>
+          </div>
+        </div>
+
+        <div class="time-block">
+          <div class="time-label">બપોરે 12:00 - 2:00</div>
+          <div class="time-content">
+            <p>એક વાટકી સલાડ (કાકડી / ટામેટા / કોબીજ).</p>
+            <p>2 થી 3 રોટલી અથવા ભાખરી.</p>
+            <p>1 વાટકી (100 ગ્રામ) લીલી શાકભાજી અથવા કઠોળ.</p>
+            <p>1/3 વાટકી પોલિશ વગરના ચોખા <strong>અને</strong> 1 વાટકી દાળ.</p>
+            <p>1 વાટકી દહીં અથવા 1 ગ્લાસ છાશ (માખણ વગરની).</p>
+          </div>
+        </div>
+
+        <div class="time-block">
+          <div class="time-label">સાંજે 4:00 - 5:00</div>
+          <div class="time-content">
+            <p>એક કપ મોળી ચા / કોફી / દૂધ (મલાઈ વગર).</p>
+            <p>1 ખાખરો અથવા 1-2 સુગર ફ્રી બિસ્કિટ.</p>
+            <p>1 નાની વાટકી શેકેલા ચણા / જુવારની ધાણી.</p>
+          </div>
+        </div>
+
+        <div class="time-block">
+          <div class="time-label">સાંજે 7:00 - 8:00</div>
+          <div class="time-content">
+            <p>1 થી 2 ભાખરી/રોટલી <strong>અથવા</strong> અડધો રોટલો.</p>
+            <p>1 વાટકી શાક (100 ગ્રામ).</p>
+            <p>1 વાટકી ખીચડી (૩ ભાગ મિક્સ દાળ, 1 ભાગ ચોખા) <strong>અને</strong> 1 વાટકી કઢી.</p>
+          </div>
+        </div>
+
+        <div class="time-block">
+          <div class="time-label">રાત્રે 10:00 (સૂતી વખતે)</div>
+          <div class="time-content">
+            <p>1 કપ મલાઈ વગરનું દૂધ <strong>અથવા</strong> પપૈયું (1-2 ટુકડા).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-card" id="alert-section">
+      <div class="alert-header">
+        <span class="alert-icon">⚠️</span>
+        <h3>ચેતવણી: હાઈપોગ્લાયકેમિયા (સુગર ઘટી જવી)</h3>
+      </div>
+      <ul class="alert-list">
+        <li><strong>લક્ષણો:</strong> પરસેવો થવો, આંખમાં અંધારા આવવા, ચક્કર આવવા અથવા ગભરામણ થવી.</li>
+        <li><strong>શું કરવું?:</strong> તરત જ મોઢામાં ખાંડ કે ચોકલેટ મૂકી દેવી અને નજીકમાં ડૉક્ટરનો સંપર્ક કરવો.</li>
+        <li><strong>ખાસ નોંધ:</strong> સુગરની દવા લીધા પછી જમવાનું ન લેવાથી જીવનું જોખમ છે. જમવાનું તૈયાર હોય ત્યારે જ સુગરની દવા લેવી.</li>
+      </ul>
+    </div>
+
+    <div class="section-card" id="lab-section">
+      <h3 class="section-title">ડાયાબિટીસ લેબ રિપોર્ટની પ્રક્રિયા</h3>
+      <div class="lab-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">સવારે ભૂખ્યા પેટે <strong>સવારની દવા લેવી</strong> (લોહી આપવાના 15 મિનિટ પહેલાં).</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>FBS</strong> (ભૂખ્યા પેટનો) રિપોર્ટ માટે લેબમાં લોહી આપવું.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">લોહી આપ્યા પછી <strong>તરત નાસ્તો કરી લેવો</strong>.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">બપોરે 12:00 વાગ્યે દવા લેવી (જો આવતી હોય તો) અને 15 મિનિટ પછી જમવું. (જો દવા ન હોય તો સીધું જમી લેવું).</div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-text">બપોરે 2:00 / 2:15 વાગ્યે <strong>PPBS</strong> માટે લોહી આપવું (જમ્યાના બરાબર 2 કલાકમાં).</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="no-print">
+      <a href="https://drmjp93.in" target="_blank" rel="noopener">drmjp93.in</a> · 
+      <a href="https://tools.drmjp93.in" target="_blank" rel="noopener">tools.drmjp93.in</a> · 
+      <a href="https://labs.drmjp93.in">labs.drmjp93.in</a>
+    </footer>
+  </main>
+</body>
+</html>
