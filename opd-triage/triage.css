@@ -1,0 +1,112 @@
+.triage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.pills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.symptom-pill {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.symptom-pill:hover {
+  border-color: var(--accent);
+}
+
+.symptom-pill.selected {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* Result Card */
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.result-card.emergency {
+  background: #ef4444; /* Bright Red */
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.result-card.emergency .result-header {
+  border-bottom-color: rgba(255,255,255,0.3);
+}
+
+.result-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.result-symptoms {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.result-card.emergency .result-symptoms {
+  color: rgba(255,255,255,0.9);
+}
+
+/* Buttons */
+.action-btn {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.action-btn:hover {
+  opacity: 0.8;
+}
+
+.action-btn.outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.result-card.emergency .action-btn {
+  background: #ffffff;
+  color: #ef4444;
+}
+.result-card.emergency .action-btn.outline {
+  color: #ffffff;
+  border-color: #ffffff;
+}
