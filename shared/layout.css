@@ -123,3 +123,30 @@ footer {
     gap: 15px;
   }
 }
+@media (max-width: 600px) {
+  .header {
+    flex-direction: row; /* KEEP TITLE AND TOGGLE ON THE SAME LINE */
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .theme-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px 12px; /* SLIGHTLY SMALLER FOR MOBILE */
+  }
+
+  .theme-label {
+    display: none; /* HIDE THE TEXT ON MOBILE TO SAVE SPACE */
+  }
+
+  .theme-toggle {
+    min-width: 40px; /* MAKE IT A CIRCLE/SQUARE ICON BUTTON */
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
