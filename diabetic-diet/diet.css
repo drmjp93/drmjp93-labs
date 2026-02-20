@@ -89,6 +89,24 @@ footer { order: 100; margin-top: 30px; }
 /* Screen only elements */
 .print-only { display: none; }
 
+/* --- Mobile Header Fix --- */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+  
+  .action-buttons-group {
+    display: flex;
+    flex-wrap: wrap; /* Allows buttons to wrap safely on tiny screens */
+    gap: 12px;
+  }
+
+  .theme-toggle {
+    position: static !important; /* Stops the button from floating on top of Print */
+  }
+}
 /* =========================================
    PRINT STYLES (Pure HTML Order to prevent Chrome Bugs)
    ========================================= */
