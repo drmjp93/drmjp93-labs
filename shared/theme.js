@@ -59,3 +59,44 @@ if (toggleBtn) {
     }
   });
 })();
+
+// ==========================================
+// VISITOR COUNT LOGIC (Session-Cached for Labs)
+// ==========================================
+(async function () {
+  const el = document.getElementById("visitCount");
+  if (!el) return;
+
+  try {
+    // 1. Check if we already fetched and saved the count in this session
+    const savedCount = sessionStorage.getItem("labs_visit_count");
+    
+    if (savedCount) {
+      // Instantly show the saved count without talking to the server!
+      el.textContent = savedCount;
+      return;
+    }
+
+    // 2. If no saved count, hit the API to increase and get the new total
+    const resp = await fetch("https://api.counterapi.dev/v1/drmjp93in/labs-visits/up");
+    const j = await resp.json();
+
+    if (j && j.count !== undefined) {
+      let count = j.count;
+
+      // Format large numbers
+      if (count >= 1000) {
+        count = Math.floor(count / 100) * 100 + "+";
+      }
+
+      // 3. Save it to memory so other pages load it instantly
+      sessionStorage.setItem("labs_visit_count", count);
+      el.textContent = count;
+    } else {
+      throw new Error("Invalid API response");
+    }
+  } catch (e) {
+    console.error("Visitor count error:", e);
+    el.textContent = "—";
+  }
+})();
