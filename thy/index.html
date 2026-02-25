@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Thyroid Clinic - Auto Note</title>
+  <title>Thyroid Clinic</title>
   <style>
     :root { --bg: #f8fafc; --border: #cbd5e1; --accent: #0284c7; --pill-bg: #e0f2fe; --pill-text: #0369a1; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); padding: 20px; color: #334155; overflow: hidden; }
 
     /* =========================================
-       MAC-OS STEALTH LOCK SCREEN (PIN: 3342)
+       MAC-OS STEALTH LOCK SCREEN 
        ========================================= */
     #auth-screen { 
       position: fixed; inset: 0; z-index: 9999;
@@ -62,9 +62,7 @@
     #compliance-box { transition: 0.3s; opacity: 0.4; pointer-events: none; }
     #compliance-box.active { opacity: 1; pointer-events: auto; }
 
-    /* =========================================
-       BEAUTIFIED PRINT CSS (OPD PRESCRIPTION)
-       ========================================= */
+  
     #print-area { display: none; }
     @media print {
       /* 30mm (3cm) exact top margin for Letterhead */
@@ -160,7 +158,7 @@
 
 <div class="main-wrapper">
   <div class="left-pane">
-    <h2>Thyroid OPD Automator</h2>
+    <h2>Thyroid</h2>
 
     <div class="section">
       <div class="grid-4">
@@ -209,7 +207,7 @@
     </div>
 
     <div class="section" id="compliance-box">
-      <h3 style="color: #ef4444;">Abnormal TSH Detected - Check Compliance</h3>
+      <h3 style="color: #ef4444;"> TSH Deranged </h3>
       <div style="display: flex; gap: 20px; margin-top: 10px;">
         <label style="cursor: pointer; font-size: 1rem;">
           <input type="radio" name="comp-status" id="comp-good" value="denies" onchange="generateNote()" checked> Patient denies poor compliance
@@ -230,7 +228,7 @@
         <div class="input-group">
           <label>Follow-up</label>
           <select id="rx-fu" onchange="generateNote()">
-            <option value="After 6 weeks with fresh S. TSH">After 6 weeks with fresh TSH</option>
+            <option value="After 6 weeks with fresh S. TSH">After 6 weeks (1.5 Month) with fresh TSH</option>
             <option value="After 3 months with fresh S. TSH">After 3 months with fresh TSH</option>
             <option value="After 6 months with fresh S. TSH">After 6 months with fresh TSH</option>
             <option value="After 1 year">After 1 year</option>
@@ -285,8 +283,8 @@
 
   <div class="signature-block">
     <div class="signature-name">Dr. Mit Panchani</div>
-    <div class="signature-creds">MBBS, MD General Medicine, PGCIH</div>
-    <div class="signature-creds">Fellow in 2D Echo</div>
+    <div class="signature-creds">MBBS, MD General Medicine</div>
+    <div class="signature-creds">Fellow in 2D Echo, PGCIH</div>
   </div>
 </div>
 
