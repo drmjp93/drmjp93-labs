@@ -75,11 +75,25 @@
     /* =========================================
        PRINT CSS (3cm Letterhead Margin)
        ========================================= */
+
     @media print {
       @page { size: A4; margin: 30mm 15mm 15mm 15mm; }
-      body { background: white; padding: 0; font-size: 13px; color: #000; line-height: 1.3; overflow: auto; }
+      
+      body { 
+        background: white; padding: 0; 
+        font-size: 13px; color: #000; 
+        line-height: 1.3; overflow: auto; 
+        margin: 0 !important; /* Force reset */
+      }
+
       #auth-screen, .main-wrapper { display: none !important; }
-      #print-area { display: block !important; }
+      
+      /* THIS IS THE FIX: Physically pushes content down 30mm */
+      #print-area { 
+        display: block !important; 
+        padding-top: 30mm !important; 
+        width: 100%;
+      }
       
       .print-header { text-align: center; margin-bottom: 15px; }
       .print-header h1 { font-size: 1.4rem; color: #000; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 5px; display: inline-block; }
