@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thyroid Clinic - Auto Note</title>
+  <style>
+    :root { --bg: #f8fafc; --border: #cbd5e1; --accent: #0284c7; --pill-bg: #e0f2fe; --pill-text: #0369a1; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); padding: 20px; color: #334155; overflow: hidden; }
+
+    /* =========================================
+       MAC-OS STEALTH LOCK SCREEN (PIN: 3342)
+       ========================================= */
+    #auth-screen { 
+      position: fixed; inset: 0; z-index: 9999;
+      background: radial-gradient(circle at top right, #334155, #0f172a);
+      display: flex; justify-content: center; align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .mac-lock-box { text-align: center; padding: 30px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease; }
+    .mac-avatar {
+      width: 75px; height: 75px; margin: 0 auto 15px; border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 1.8rem; font-weight: 600; color: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .mac-lock-box h2 { color: #f8fafc; font-size: 1.2rem; margin-bottom: 5px; border: none; letter-spacing: 0.5px; }
+    .mac-subtitle { color: #94a3b8; font-size: 0.85rem; }
+
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+    .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    .unlock-fade { opacity: 0; visibility: hidden; }
+    .unlock-scale { transform: scale(1.15); opacity: 0; }
+
+    /* =========================================
+       MAIN APPLICATION UI
+       ========================================= */
+    .main-wrapper { display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
+    .left-pane { flex: 2; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    .right-pane { flex: 1; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); position: sticky; top: 20px; display: flex; flex-direction: column; height: calc(100vh - 40px); }
+
+    h2, h3 { color: var(--accent); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+    .section { margin-bottom: 25px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fafafa; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .input-group { display: flex; flex-direction: column; }
+    label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95rem; }
+    
+    textarea { flex-grow: 1; resize: none; font-size: 1rem; padding: 15px; line-height: 1.6; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; }
+
+    .btn-print { background: var(--accent); color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; margin-bottom: 10px; }
+    .btn-print:hover { background: #0369a1; }
+    .btn-copy { background: #e2e8f0; color: #334155; border: none; padding: 12px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-copy:hover { background: #cbd5e1; }
+
+    /* Conditional Highlight for Abnormal TSH */
+    .tsh-abnormal { border: 2px solid #ef4444 !important; background: #fef2f2; }
+    #compliance-box { transition: 0.3s; opacity: 0.4; pointer-events: none; }
+    #compliance-box.active { opacity: 1; pointer-events: auto; }
+
+    /* =========================================
+       BEAUTIFIED PRINT CSS (OPD PRESCRIPTION)
+       ========================================= */
+    #print-area { display: none; }
+    @media print {
+      /* 30mm (3cm) exact top margin for Letterhead */
+      @page { size: A4; margin: 30mm 15mm 15mm 15mm; }
+      
+      body { 
+        background: white; padding: 0; 
+        font-family: "Segoe UI", Arial, sans-serif; 
+        font-size: 14pt; /* Professional baseline size */
+        color: #000; line-height: 1.5; overflow: auto; 
+      }
+      
+      #auth-screen, .main-wrapper { display: none !important; }
+      #print-area { display: block !important; }
+      
+      /* Header Bar */
+      .rx-header { 
+        display: flex; justify-content: space-between; 
+        border-bottom: 2px solid #334155; 
+        padding-bottom: 12px; margin-bottom: 25px; 
+        font-size: 1.15rem; 
+      }
+      .rx-header div { font-weight: 600; }
+      
+      /* 2-Column Layout */
+      .rx-body { display: flex; gap: 30px; margin-top: 10px; }
+      
+      /* Sidebar for Vitals & Labs */
+      .rx-sidebar { 
+        width: 30%; 
+        border-right: 2px solid #e2e8f0; 
+        padding-right: 20px; 
+      }
+      .rx-sidebar-title { 
+        font-size: 1.05rem; font-weight: 700; text-transform: uppercase; 
+        letter-spacing: 0.5px; margin-bottom: 15px; 
+        border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; color: #334155; 
+      }
+      .rx-sidebar p { 
+        margin-bottom: 12px; font-size: 1.05rem; 
+        display: flex; justify-content: space-between; 
+        border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; 
+      }
+      .rx-sidebar p span:first-child { font-weight: 600; color: #475569; }
+      
+      /* Special TSH Highlight Box */
+      .tsh-highlight { 
+        margin-top: 25px; background: #f8fafc; 
+        padding: 15px; border-radius: 8px; text-align: center; 
+        border: 1px solid #cbd5e1; 
+      }
+      .tsh-highlight .tsh-label { font-size: 0.9rem; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+      .tsh-highlight .tsh-value { font-size: 1.4rem; font-weight: 800; color: #0f172a; }
+      
+      /* Main Prescription Area */
+      .rx-main { width: 70%; padding-left: 10px; }
+      
+      /* Official Rx Symbol */
+      .rx-symbol { 
+        font-family: "Georgia", "Times New Roman", serif; 
+        font-size: 3.5rem; font-weight: normal; 
+        margin-bottom: 15px; color: #000; line-height: 1; 
+      }
+      
+      /* Note Text Formatting */
+      .rx-note { 
+        font-size: 1.15rem; line-height: 1.7; 
+        white-space: pre-wrap; color: #0f172a; 
+      }
+      
+      /* Follow Up Box */
+      .rx-footer { 
+        margin-top: 40px; padding-top: 15px; 
+        border-top: 1px dashed #cbd5e1; font-size: 1.15rem; 
+      }
+      
+      /* Signature Block */
+      .signature-block { margin-top: 70px; text-align: right; }
+      .signature-name { font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; color: #000; }
+      .signature-creds { font-size: 0.95rem; color: #334155; margin-bottom: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="mac-lock-box" id="mac-lock-box">
+    <div class="mac-avatar">MP</div>
+    <h2>Dr. Mit Panchani</h2>
+    <p class="mac-subtitle">Thyroid Follow-Up Module</p>
+  </div>
+</div>
+
+<div class="main-wrapper">
+  <div class="left-pane">
+    <h2>Thyroid OPD Automator</h2>
+
+    <div class="section">
+      <div class="grid-4">
+        <div class="input-group"><label>Patient Name</label><input type="text" id="pt-name" oninput="generateNote()"></div>
+        <div class="input-group"><label>Age</label><input type="number" id="pt-age" oninput="generateNote()"></div>
+        <div class="input-group"><label>Gender</label>
+          <select id="pt-gender" onchange="generateNote()"><option>Female</option><option>Male</option></select>
+        </div>
+        <div class="input-group"><label>Date</label><input type="date" id="pt-date"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="grid-3">
+        <div class="input-group">
+          <label>Diagnosis</label>
+          <select id="pt-dx" onchange="generateNote()">
+            <option value="Hypothyroid">KCO Hypothyroidism</option>
+            <option value="Hyperthyroid">KCO Hyperthyroidism</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Current Thyroxine Dose (mcg)</label>
+          <input type="number" id="pt-dose" placeholder="e.g. 75" oninput="generateNote()">
+        </div>
+        <div class="input-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="pt-wt" oninput="generateNote()">
+        </div>
+      </div>
+      
+      <div class="grid-3" style="margin-top: 15px;">
+        <div class="input-group">
+          <label>BP (mmHg)</label>
+          <input type="text" id="pt-bp" placeholder="e.g. 120/80" oninput="generateNote()">
+        </div>
+        <div class="input-group">
+          <label>HR (/min)</label>
+          <input type="number" id="pt-hr" oninput="generateNote()">
+        </div>
+        <div class="input-group">
+          <label>S. TSH (µIU/mL)</label>
+          <input type="number" id="pt-tsh" step="0.01" oninput="generateNote()" placeholder="e.g. 5.6">
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="compliance-box">
+      <h3 style="color: #ef4444;">Abnormal TSH Detected - Check Compliance</h3>
+      <div style="display: flex; gap: 20px; margin-top: 10px;">
+        <label style="cursor: pointer; font-size: 1rem;">
+          <input type="radio" name="comp-status" id="comp-good" value="denies" onchange="generateNote()" checked> Patient denies poor compliance
+        </label>
+        <label style="cursor: pointer; font-size: 1rem;">
+          <input type="radio" name="comp-status" id="comp-poor" value="present" onchange="generateNote()"> Poor compliance present
+        </label>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h3>New Prescription Plan</h3>
+      <div class="grid-2">
+        <div class="input-group">
+          <label>Prescribe Thyroxine (mcg)</label>
+          <input type="text" id="rx-dose" placeholder="Leave blank to auto-suggest based on TSH" oninput="generateNote()">
+        </div>
+        <div class="input-group">
+          <label>Follow-up</label>
+          <select id="rx-fu" onchange="generateNote()">
+            <option value="After 6 weeks with fresh S. TSH">After 6 weeks with fresh TSH</option>
+            <option value="After 3 months with fresh S. TSH">After 3 months with fresh TSH</option>
+            <option value="After 6 months with fresh S. TSH">After 6 months with fresh TSH</option>
+            <option value="After 1 year">After 1 year</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-pane">
+    <h3 style="margin-bottom: 5px;">Clinical Note & Rx</h3>
+    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Fully editable. Paste to EMR or Print.</p>
+    
+    <textarea id="note-box"></textarea>
+    
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <button class="btn-copy" onclick="copyNote()" id="copy-btn">📋 Copy Note to Clipboard</button>
+      <button class="btn-print" onclick="preparePrint()">🖨️ Print Prescription Slip</button>
+    </div>
+  </div>
+</div>
+
+<div id="print-area">
+  <div class="rx-header">
+    <div class="rx-patient-info"><b>Name:</b> <span id="p-name"></span> &nbsp;&nbsp;|&nbsp;&nbsp; <b>Age/Sex:</b> <span id="p-age-sex"></span></div>
+    <div class="rx-date"><b>Date:</b> <span id="p-date"></span></div>
+  </div>
+
+  <div class="rx-body">
+    <div class="rx-sidebar">
+      <div class="rx-sidebar-title">Clinical Profile</div>
+      <p><span>Wt:</span> <span id="p-wt"></span></p>
+      <p><span>BP:</span> <span id="p-bp"></span></p>
+      <p><span>HR:</span> <span id="p-hr"></span></p>
+      
+      <div class="tsh-highlight">
+        <div class="tsh-label">S. TSH Level</div>
+        <div class="tsh-value" id="p-tsh"></div>
+      </div>
+    </div>
+
+    <div class="rx-main">
+      <div class="rx-symbol">℞</div>
+      
+      <div id="p-note" class="rx-note"></div>
+      
+      <div class="rx-footer">
+        <b>Follow-up:</b> <span id="p-fu"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="signature-block">
+    <div class="signature-name">Dr. Mit Panchani</div>
+    <div class="signature-creds">MBBS, MD General Medicine, PGCIH</div>
+    <div class="signature-creds">Fellow in 2D Echo</div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // INVISIBLE KEYSTROKE AUTHENTICATION LOGIC
+  // ==========================================
+  let pinBuffer = "";
+  const lockScreen = document.getElementById('auth-screen');
+  const lockBox = document.getElementById('mac-lock-box');
+
+  document.addEventListener('keydown', function(e) {
+    if (lockScreen.style.display === 'none') return;
+    
+    if (!isNaN(e.key) && e.key.trim() !== "") {
+      if (pinBuffer.length < 4) {
+        pinBuffer += e.key;
+        if (pinBuffer.length === 4) {
+          if (pinBuffer === "3342") {
+            lockBox.classList.add('unlock-scale');
+            lockScreen.classList.add('unlock-fade');
+            setTimeout(() => {
+              lockScreen.style.display = 'none';
+              document.body.style.overflow = 'auto';
+              pinBuffer = ""; 
+            }, 500);
+          } else {
+            lockBox.classList.remove('shake');
+            void lockBox.offsetWidth; 
+            lockBox.classList.add('shake');
+            pinBuffer = ""; 
+          }
+        }
+      }
+    } else if (e.key === 'Backspace') {
+      pinBuffer = pinBuffer.slice(0, -1);
+    }
+  });
+
+  // ==========================================
+  // THYROID LOGIC ENGINE
+  // ==========================================
+  document.getElementById('pt-date').valueAsDate = new Date();
+
+  function generateNote() {
+    const dx = document.getElementById('pt-dx').value;
+    const dose = document.getElementById('pt-dose').value;
+    const tshStr = document.getElementById('pt-tsh').value;
+    const manualRx = document.getElementById('rx-dose').value;
+    const compPoor = document.getElementById('comp-poor').checked;
+    const compBox = document.getElementById('compliance-box');
+    const tshInput = document.getElementById('pt-tsh');
+
+    let note = `${dx} on Tab. Thyroxine ${dose ? dose + ' mcg' : '____ mcg'}\n\n`;
+
+    // Smart TSH Logic
+    let newDoseStr = "";
+    if (tshStr) {
+      let tsh = parseFloat(tshStr);
+      
+      if (tsh > 4.5 || tsh < 0.5) {
+        compBox.classList.add('active');
+        tshInput.classList.add('tsh-abnormal');
+        
+        if (tsh > 4.5) {
+          if (compPoor) {
+            note += "TSH is raised. Poor compliance present. \nCounselled patient regarding strict empty stomach morning dosing and avoiding food/tea for 45 minutes.\n";
+            newDoseStr = dose ? dose : "____";
+          } else {
+            note += "TSH is raised. Patient denies poor compliance. \nAdvised to increase Thyroxine dose.\n";
+            newDoseStr = dose ? (parseFloat(dose) + 12.5) + " to " + (parseFloat(dose) + 25) : "____";
+          }
+        } else if (tsh < 0.5) {
+          note += "TSH is suppressed below normal limits. \nAdvised to decrease Thyroxine dose to prevent iatrogenic thyrotoxicosis.\n";
+          newDoseStr = dose ? (parseFloat(dose) - 12.5) + " to " + (parseFloat(dose) - 25) : "____";
+        }
+      } else {
+        compBox.classList.remove('active');
+        tshInput.classList.remove('tsh-abnormal');
+        note += "TSH is WNL (Well controlled). \nNo comments / continue same management.\n";
+        newDoseStr = dose ? dose : "____";
+      }
+    } else {
+      compBox.classList.remove('active');
+      tshInput.classList.remove('tsh-abnormal');
+    }
+
+    // Prescription Line
+    let finalRxDose = manualRx ? manualRx : newDoseStr;
+    if (finalRxDose) {
+      note += `\nAdv:\n- Tab. Thyroxine ${finalRxDose} mcg (1 tablet OD empty stomach in morning)`;
+    }
+
+    document.getElementById('note-box').value = note;
+  }
+
+  // ==========================================
+  // UTILITIES (Copy & Print)
+  // ==========================================
+  function copyNote() {
+    let text = document.getElementById('note-box').value;
+    navigator.clipboard.writeText(text).then(() => {
+      let btn = document.getElementById('copy-btn');
+      btn.innerText = "✅ Copied!";
+      setTimeout(() => btn.innerText = "📋 Copy Note to Clipboard", 2000);
+    });
+  }
+
+  function preparePrint() {
+    // Fill Demographics
+    document.getElementById('p-name').innerText = document.getElementById('pt-name').value || "---------";
+    document.getElementById('p-age-sex').innerText = `${document.getElementById('pt-age').value || "--"}Y / ${document.getElementById('pt-gender').value.charAt(0)}`;
+    
+    let d = document.getElementById('pt-date').value;
+    if(d) {
+       let dateObj = new Date(d);
+       document.getElementById('p-date').innerText = dateObj.toLocaleDateString('en-GB'); 
+    }
+
+    // Fill Sidebar
+    document.getElementById('p-wt').innerText = document.getElementById('pt-wt').value ? document.getElementById('pt-wt').value + " kg" : "--";
+    document.getElementById('p-bp').innerText = document.getElementById('pt-bp').value ? document.getElementById('pt-bp').value + " mmHg" : "--";
+    document.getElementById('p-hr').innerText = document.getElementById('pt-hr').value ? document.getElementById('pt-hr').value + " /min" : "--";
+    
+    // TSH Formatting
+    let tshVal = document.getElementById('pt-tsh').value;
+    document.getElementById('p-tsh').innerText = tshVal ? tshVal + " µIU/mL" : "Awaited";
+    if (tshVal && (parseFloat(tshVal) > 4.5 || parseFloat(tshVal) < 0.5)) {
+      document.getElementById('p-tsh').style.color = '#dc2626'; // Red if abnormal
+    } else {
+      document.getElementById('p-tsh').style.color = '#0f172a'; // Normal
+    }
+
+    // Fill Main Note & Follow-up
+    document.getElementById('p-note').innerText = document.getElementById('note-box').value;
+    document.getElementById('p-fu').innerText = document.getElementById('rx-fu').value;
+
+    window.print();
+  }
+</script>
+
+</body>
+</html>
