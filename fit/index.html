@@ -275,6 +275,24 @@
 </div>
 
 <script>
+
+        // ==========================================
+  // BP SMART AUTO-FORMATTER
+  // ==========================================
+  document.getElementById('v-bp').addEventListener('input', function (e) {
+    if (e.inputType === 'deleteContentBackward') {
+      generateNote();
+      return;
+    }
+    let v = this.value;
+    // Auto add slash after exactly 3 digits
+    if (v.length === 3 && !v.includes('/')) {
+      this.value = v + '/';
+    }
+    generateNote();
+  });
+
+  
   // ==========================================
   // INVISIBLE KEYSTROKE AUTHENTICATION LOGIC
   // ==========================================
