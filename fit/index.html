@@ -1,1 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Physician Portal - Pre-Op Fitness</title>
+  <style>
+    :root { --bg: #f8fafc; --border: #cbd5e1; --accent: #0284c7; --pill-bg: #e0f2fe; --pill-text: #0369a1; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); padding: 20px; color: #334155; overflow: hidden; } /* Prevents scrolling while locked */
 
+    /* =========================================
+       MACOS-STYLE INVISIBLE LOCK SCREEN
+       ========================================= */
+    #auth-screen { 
+      position: fixed; inset: 0; z-index: 9999;
+      background: radial-gradient(circle at top right, #334155, #0f172a);
+      display: flex; justify-content: center; align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .mac-lock-box {
+      text-align: center; padding: 30px;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+    }
+    .mac-avatar {
+      width: 75px; height: 75px; margin: 0 auto 15px; border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 1.8rem; font-weight: 600; color: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .mac-lock-box h2 { color: #f8fafc; font-size: 1.2rem; margin-bottom: 5px; border: none; letter-spacing: 0.5px; }
+    .mac-subtitle { color: #94a3b8; font-size: 0.85rem; }
+
+    /* macOS Animations */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    .unlock-fade { opacity: 0; visibility: hidden; }
+    .unlock-scale { transform: scale(1.15); opacity: 0; }
+
+    /* =========================================
+       MAIN APPLICATION UI
+       ========================================= */
+    .main-wrapper { display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
+    .left-pane { flex: 2; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    .right-pane { flex: 1; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); position: sticky; top: 20px; display: flex; flex-direction: column; height: calc(100vh - 40px); }
+
+    h2, h3 { color: var(--accent); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+    .section { margin-bottom: 25px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fafafa; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .input-group { display: flex; flex-direction: column; }
+    label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95rem; }
+    
+    textarea { flex-grow: 1; resize: none; font-size: 0.95rem; padding: 12px; line-height: 1.5; margin-bottom: 15px; }
+
+    .pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+    .kco-pill { display: inline-block; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none; transition: 0.2s; }
+    .kco-pill input { display: none; }
+    .kco-pill.active { background: var(--pill-bg); border-color: var(--accent); color: var(--pill-text); font-weight: bold; }
+    .exam-pill { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 5px; }
+    .exam-pill:hover { background: #fca5a5; }
+
+    .btn-print { background: var(--accent); color: white; border: none; padding: 15px 20px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+    .btn-print:hover { background: #0369a1; }
+
+    #print-area { display: none; }
+
+    /* =========================================
+       PRINT CSS (3cm Letterhead Margin)
+       ========================================= */
+    @media print {
+      @page { size: A4; margin: 30mm 15mm 15mm 15mm; }
+      body { background: white; padding: 0; font-size: 13px; color: #000; line-height: 1.3; overflow: auto; }
+      #auth-screen, .main-wrapper { display: none !important; }
+      #print-area { display: block !important; }
+      
+      .print-header { text-align: center; margin-bottom: 15px; }
+      .print-header h1 { font-size: 1.4rem; color: #000; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 5px; display: inline-block; }
+      
+      .print-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+      .print-section { margin-bottom: 12px; }
+      .print-section h4 { text-decoration: underline; margin-bottom: 4px; font-size: 1.05rem; color: #000; }
+      
+      .lab-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.9rem; }
+      .lab-table th, .lab-table td { border: 1px solid #000; padding: 5px; text-align: left; }
+      .lab-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; width: 15%; font-weight: bold; }
+      .lab-table td { width: 35%; }
+      
+      #p-advice { white-space: pre-wrap; line-height: 1.5; font-weight: bold; font-size: 1rem; margin-top: 5px; }
+      
+      .signature-block { margin-top: 40px; text-align: right; }
+      .signature-block p { margin-bottom: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="mac-lock-box" id="mac-lock-box">
+    <div class="mac-avatar">MP</div>
+    <h2>Dr. Mit Panchani</h2>
+    <p class="mac-subtitle">Physician Fitness Portal</p>
+  </div>
+</div>
+
+<div class="main-wrapper">
+  <div class="left-pane">
+    <h2>Pre-Op Physician Fitness Form</h2>
+
+    <div class="section">
+      <div class="grid-4">
+        <div class="input-group"><label>Patient Name</label><input type="text" id="pt-name"></div>
+        <div class="input-group"><label>Age</label><input type="number" id="pt-age"></div>
+        <div class="input-group"><label>Gender</label>
+          <select id="pt-gender"><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div class="input-group"><label>Date</label><input type="date" id="pt-date"></div>
+      </div>
+      <div class="input-group" style="margin-top: 15px;">
+        <label>Planned Procedure / OT Name</label>
+        <input type="text" id="pt-ot" placeholder="e.g. Laparoscopic Cholecystectomy">
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Known Case Of (KCO)</h3>
+      <div class="pill-container" id="kco-container">
+        <label class="kco-pill"><input type="checkbox" value="DM" class="kco-check" onchange="togglePill(this)"> DM</label>
+        <label class="kco-pill"><input type="checkbox" value="HTN" class="kco-check" onchange="togglePill(this)"> HTN</label>
+        <label class="kco-pill"><input type="checkbox" value="IHD" class="kco-check" onchange="togglePill(this)"> IHD</label>
+        <label class="kco-pill"><input type="checkbox" value="Asthma" class="kco-check" onchange="togglePill(this)"> Asthma</label>
+        <label class="kco-pill"><input type="checkbox" value="COPD" class="kco-check" onchange="togglePill(this)"> COPD</label>
+        <label class="kco-pill"><input type="checkbox" value="Thyroid Disorder" class="kco-check" onchange="togglePill(this)"> Thyroid Disorder</label>
+        <label class="kco-pill"><input type="checkbox" value="Hyperthyroid" class="kco-check" onchange="togglePill(this)"> Hyperthyroid</label>
+        <label class="kco-pill"><input type="checkbox" value="Hypothyroid" class="kco-check" onchange="togglePill(this)"> Hypothyroid</label>
+        <label class="kco-pill"><input type="checkbox" value="CKD" class="kco-check" onchange="togglePill(this)"> CKD</label>
+        <label class="kco-pill"><input type="checkbox" value="Epilepsy" class="kco-check" onchange="togglePill(this)"> Epilepsy</label>
+        <label class="kco-pill"><input type="checkbox" value="S/P CABG" class="kco-check" onchange="togglePill(this)"> S/P CABG</label>
+        <label class="kco-pill"><input type="checkbox" value="S/P PTCA" class="kco-check" onchange="togglePill(this)"> S/P PTCA</label>
+      </div>
+      <div class="grid-2" style="margin-top: 15px;">
+        <div class="input-group">
+          <label>Other Medical / Surgical History</label>
+          <input type="text" id="kco-other" placeholder="Any other past history">
+        </div>
+        <div class="input-group">
+          <label>Treatment Compliance</label>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+            <label style="font-size: 0.95rem; cursor: pointer;">
+              <input type="radio" name="tt-status" id="on-tt" checked> Patient is on regular T/T.
+            </label>
+            <label style="font-size: 0.95rem; cursor: pointer;">
+              <input type="radio" name="tt-status" id="off-tt"> Patient is NOT on regular T/T.
+            </label>
+            <label style="font-size: 0.95rem; cursor: pointer;">
+              <input type="checkbox" id="meds-not-brought"> Medicines not brought.
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Vitals & Examination</h3>
+      <div class="grid-4" style="margin-bottom: 15px;">
+        <div class="input-group"><label>Temp</label><input type="text" id="v-temp" value="Afebrile"></div>
+        <div class="input-group"><label>Pulse (bpm)</label><input type="text" id="v-pr"></div>
+        <div class="input-group"><label>Resp Rate (cpm)</label><input type="text" id="v-rr"></div>
+        <div class="input-group"><label>BP (mmHg)</label><input type="text" id="v-bp"></div>
+        <div class="input-group"><label>SpO2 (%)</label><input type="text" id="v-spo2"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="input-group">
+          <label>RS <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Ronchi')">+ Ronchi</span> <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Creps')">+ Creps</span></label>
+          <input type="text" id="exam-rs" value="BSBE clear">
+        </div>
+        <div class="input-group">
+          <label>CVS <span class="exam-pill" onclick="appendExam('exam-cvs', 'Murmur +')">+ Murmur</span></label>
+          <input type="text" id="exam-cvs" value="S1S2+, no murmur">
+        </div>
+        <div class="input-group">
+          <label>CNS</label>
+          <input type="text" id="exam-cns" value="Conscious, orientated">
+        </div>
+        <div class="input-group">
+          <label>P/A <span class="exam-pill" onclick="appendExam('exam-pa', 'Guarding +')">+ Guarding</span> <span class="exam-pill" onclick="appendExam('exam-pa', 'Rigidity +')">+ Rigidity</span></label>
+          <input type="text" id="exam-pa" value="Soft and NT">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Investigations</h3>
+      <div class="grid-4">
+        <div class="input-group"><label>Hb (g/dL)</label><input type="text" id="lab-hb"></div>
+        <div class="input-group"><label>TC (cells/cumm)</label><input type="text" id="lab-tc"></div>
+        <div class="input-group"><label>Platelets (lakhs)</label><input type="text" id="lab-plt"></div>
+        <div class="input-group"><label>RBS / FBS (mg/dL)</label><input type="text" id="lab-rbs"></div>
+        <div class="input-group"><label>HbA1c (%)</label><input type="text" id="lab-hba1c"></div>
+        <div class="input-group"><label>S. Creat (mg/dL)</label><input type="text" id="lab-creat"></div>
+        <div class="input-group"><label>SGPT (U/L)</label><input type="text" id="lab-sgpt"></div>
+        <div class="input-group"><label>PT (sec)</label><input type="text" id="lab-pt"></div>
+        <div class="input-group"><label>INR</label><input type="text" id="lab-inr"></div>
+        <div class="input-group"><label>APTT (sec)</label><input type="text" id="lab-aptt"></div>
+        <div class="input-group"><label>TSH (µIU/mL)</label><input type="text" id="lab-tsh"></div>
+        <div class="input-group"><label>Urine Routine</label><input type="text" id="lab-urine" value="Noted"></div>
+      </div>
+      <div class="grid-3" style="margin-top: 15px;">
+        <div class="input-group"><label>ECG</label><input type="text" id="lab-ecg" value="WNL"></div>
+        <div class="input-group"><label>ECHO</label><input type="text" id="lab-echo" value="Noted"></div>
+        <div class="input-group"><label>CXR</label><input type="text" id="lab-cxr" value="Noted"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-pane">
+    <h3 style="margin-bottom: 5px;">Fitness Advice & Remarks</h3>
+    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Fully editable text. Auto-updates based on selections.</p>
+    
+    <textarea id="advice-box"></textarea>
+    
+    <button class="btn-print" onclick="preparePrint()">🖨️ Print Certificate</button>
+  </div>
+</div>
+
+<div id="print-area">
+  <div class="print-header">
+    <h1>Pre-Operative Fitness Certificate</h1>
+  </div>
+
+  <div class="print-row">
+    <div><b>Name:</b> <span id="p-name"></span></div>
+    <div><b>Age/Sex:</b> <span id="p-age-sex"></span></div>
+    <div><b>Date:</b> <span id="p-date"></span></div>
+  </div>
+  <div class="print-row" style="margin-bottom: 15px;">
+    <div><b>Planned Procedure:</b> <span id="p-ot"></span></div>
+  </div>
+
+  <div class="print-section" id="print-kco-section">
+    <h4>Clinical History</h4>
+    <p><span id="p-kco"></span></p>
+  </div>
+
+  <div class="print-section" id="print-exam-section">
+    <h4>On Examination</h4>
+    <p id="p-vitals" style="margin-bottom: 3px;"></p>
+    <p id="p-systemic"></p>
+  </div>
+
+  <div class="print-section" id="print-lab-section">
+    <h4>Investigations</h4>
+    <table class="lab-table" id="dynamic-lab-table">
+      </table>
+  </div>
+
+  <div class="print-section" style="margin-top: 20px;">
+    <h4>Fitness & Advice</h4>
+    <div id="p-advice"></div>
+  </div>
+
+  <div class="signature-block">
+    <p style="font-weight: bold; font-size: 1.1rem;">Dr. Mit Panchani</p>
+    <p>MBBS, MD General Medicine, PGCIH</p>
+    <p>Fellow in 2D Echo</p>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // INVISIBLE KEYSTROKE AUTHENTICATION LOGIC
+  // ==========================================
+  let pinBuffer = "";
+  const CORRECT_PIN = "3342";
+  const lockScreen = document.getElementById('auth-screen');
+  const lockBox = document.getElementById('mac-lock-box');
+
+  document.addEventListener('keydown', function(e) {
+    // Stop listening once unlocked
+    if (lockScreen.style.display === 'none') return;
+    
+    // Accept numbers only
+    if (!isNaN(e.key) && e.key.trim() !== "") {
+      if (pinBuffer.length < 4) {
+        pinBuffer += e.key;
+        
+        // Auto-check on 4th digit
+        if (pinBuffer.length === 4) {
+          if (pinBuffer === CORRECT_PIN) {
+            // Correct PIN: Scale up and fade out
+            lockBox.classList.add('unlock-scale');
+            lockScreen.classList.add('unlock-fade');
+            setTimeout(() => {
+              lockScreen.style.display = 'none';
+              document.body.style.overflow = 'auto'; // Restore scrolling
+              pinBuffer = ""; // reset security
+            }, 500);
+          } else {
+            // Incorrect PIN: macOS Shake and reset
+            lockBox.classList.remove('shake');
+            void lockBox.offsetWidth; // Force CSS reflow to restart animation
+            lockBox.classList.add('shake');
+            pinBuffer = ""; // Reset buffer instantly
+          }
+        }
+      }
+    } 
+    // Handle backspace gracefully
+    else if (e.key === 'Backspace') {
+      pinBuffer = pinBuffer.slice(0, -1);
+    }
+  });
+
+  // ==========================================
+  // FORM LOGIC
+  // ==========================================
+  
+  // Auto-set today's date
+  document.getElementById('pt-date').valueAsDate = new Date();
+
+  // Handle Pill selection and Auto-generation trigger
+  function togglePill(el) {
+    if (el.checked) {
+      el.parentElement.classList.add('active');
+    } else {
+      el.parentElement.classList.remove('active');
+    }
+    generateAdvice();
+  }
+
+  // Quick Exam Pills
+  function appendExam(inputId, text) {
+    let input = document.getElementById(inputId);
+    if (["BSBE clear", "S1S2+, no murmur", "Soft and NT"].includes(input.value)) {
+      input.value = text;
+    } else {
+      input.value += ", " + text;
+    }
+  }
+
+  // Smart Advice Generation (Merged Paragraphs)
+  function generateAdvice() {
+    let kco = Array.from(document.querySelectorAll('.kco-check:checked')).map(el => el.value);
+    
+    // Paragraph 1: Fitness Status & Merged Goals
+    let fitConditions = [];
+    if (kco.includes('DM')) fitConditions.push("OHA if RBS <= 200 mg/dL");
+    if (kco.includes('HTN')) fitConditions.push("anti-hypertensive medications if BP <= 140/90 mmHg");
+    
+    let para1 = "Patient is FIT for surgery";
+    if (fitConditions.length > 0) {
+      para1 += ` with ${fitConditions.join(" and ")} on the day of OT with due risk.`;
+    } else {
+      para1 += " under moderate/high risk.";
+    }
+
+    // Paragraph 2: Medication Instructions (separated lines)
+    let medInstructions = [];
+    if (kco.includes('DM')) {
+      medInstructions.push("Bridge with insulin according to RBS scale. Omit morning dose of OHA on the day of surgery.");
+    }
+    if (kco.includes('HTN')) {
+      medInstructions.push("Continue anti-hypertensive medications on the morning of surgery with a sip of water.");
+    }
+    if (kco.includes('IHD') || kco.includes('S/P CABG') || kco.includes('S/P PTCA')) {
+      medInstructions.push("Omit Clopidogrel / Ticagrelor 5 days before surgery and resume 1 day after OT. Bridge with LMWH up to 6/8 hours before OT (as per clinical indication). Continue Tab. Aspirin (except in strict neuro/uro surgeries).");
+    }
+    
+    let adviceText = para1;
+    if (medInstructions.length > 0) {
+      adviceText += "\n\nMedication Instructions:\n- " + medInstructions.join("\n- ");
+    }
+
+    document.getElementById('advice-box').value = adviceText;
+  }
+
+  // Run on load to set default advice text
+  generateAdvice();
+
+  // Dynamic Print Preparation
+  function preparePrint() {
+    // 1. Demographics
+    document.getElementById('p-name').innerText = document.getElementById('pt-name').value || "---------";
+    document.getElementById('p-age-sex').innerText = `${document.getElementById('pt-age').value || "--"} Yrs / ${document.getElementById('pt-gender').value}`;
+    
+    let d = document.getElementById('pt-date').value;
+    if(d) {
+       let dateObj = new Date(d);
+       document.getElementById('p-date').innerText = dateObj.toLocaleDateString('en-GB'); 
+    }
+    document.getElementById('p-ot').innerText = document.getElementById('pt-ot').value || "---------";
+
+    // 2. KCO, T/T & Medicines Not Brought (Same Line)
+    let kcoChecked = Array.from(document.querySelectorAll('.kco-check:checked')).map(el => el.value);
+    let otherKco = document.getElementById('kco-other').value.trim();
+    if (otherKco) kcoChecked.push(otherKco);
+    
+    let kcoString = kcoChecked.length > 0 ? "KCO " + kcoChecked.join(", ") : "No significant past medical history";
+    
+    // Check Radio button status for T/T
+    if (kcoChecked.length > 0) {
+      if (document.getElementById('on-tt').checked) {
+        kcoString += ". Patient is on regular T/T.";
+      } else if (document.getElementById('off-tt').checked) {
+        kcoString += ". Patient is NOT on regular T/T.";
+      }
+    }
+    
+    // Append Meds Not Brought
+    if (document.getElementById('meds-not-brought').checked) {
+      kcoString += " Medicines not brought.";
+    }
+    
+    document.getElementById('p-kco').innerText = kcoString;
+
+    // 3. Dynamic Vitals
+    let vitals = [];
+    let getV = (id, label, unit) => { let v = document.getElementById(id).value.trim(); if(v) vitals.push(`<b>${label}:</b> ${v} ${unit}`); };
+    getV('v-temp', 'Temp', '');
+    getV('v-pr', 'PR', '/min');
+    getV('v-rr', 'RR', '/min');
+    getV('v-bp', 'BP', 'mmHg');
+    getV('v-spo2', 'SpO2', '');
+    
+    document.getElementById('p-vitals').innerHTML = vitals.length > 0 ? vitals.join(' &nbsp;|&nbsp; ') : "No vitals recorded.";
+
+    // 4. Dynamic Systemic Exam
+    let sys = [];
+    let getSys = (id, label) => { let v = document.getElementById(id).value.trim(); if(v) sys.push(`<b>${label}:</b> ${v}`); };
+    getSys('exam-rs', 'RS');
+    getSys('exam-cvs', 'CVS');
+    getSys('exam-cns', 'CNS');
+    getSys('exam-pa', 'P/A');
+    
+    document.getElementById('p-systemic').innerHTML = sys.join(' &nbsp;|&nbsp; ');
+
+    // 5. Dynamic Lab Table
+    const allLabs = [
+      { id: 'lab-hb', label: 'Hb' }, { id: 'lab-tc', label: 'TC' }, { id: 'lab-plt', label: 'Platelets' },
+      { id: 'lab-rbs', label: 'RBS / FBS' }, { id: 'lab-hba1c', label: 'HbA1c' }, { id: 'lab-creat', label: 'S. Creat' },
+      { id: 'lab-sgpt', label: 'SGPT' }, { id: 'lab-tsh', label: 'TSH' }, { id: 'lab-urine', label: 'Urine R/M' },
+      { id: 'lab-pt', label: 'PT' }, { id: 'lab-inr', label: 'INR' }, { id: 'lab-aptt', label: 'APTT' },
+      { id: 'lab-ecg', label: 'ECG' }, { id: 'lab-echo', label: 'ECHO' }, { id: 'lab-cxr', label: 'CXR' }
+    ];
+
+    let activeLabs = allLabs.map(lab => ({ label: lab.label, val: document.getElementById(lab.id).value.trim() })).filter(lab => lab.val !== "");
+
+    let tableHTML = "";
+    if (activeLabs.length === 0) {
+      tableHTML = "<tr><td>No investigations recorded.</td></tr>";
+    } else {
+      for (let i = 0; i < activeLabs.length; i += 2) {
+        tableHTML += "<tr>";
+        tableHTML += `<th>${activeLabs[i].label}</th><td>${activeLabs[i].val}</td>`;
+        if (i + 1 < activeLabs.length) {
+          tableHTML += `<th>${activeLabs[i+1].label}</th><td>${activeLabs[i+1].val}</td>`;
+        } else {
+          tableHTML += `<th></th><td></td>`; 
+        }
+        tableHTML += "</tr>";
+      }
+    }
+    document.getElementById('dynamic-lab-table').innerHTML = tableHTML;
+
+    // 6. Advice
+    document.getElementById('p-advice').innerText = document.getElementById('advice-box').value;
+
+    window.print();
+  }
+</script>
+
+</body>
+</html>
