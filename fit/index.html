@@ -41,6 +41,25 @@
     .unlock-fade { opacity: 0; visibility: hidden; }
     .unlock-scale { transform: scale(1.15); opacity: 0; }
 
+        /* clear button */
+    
+    .btn-clear {
+  background: #e2e8f0;
+  color: #1e293b;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.btn-clear:hover {
+  background: #cbd5e1;
+}
     /* =========================================
        MAIN APPLICATION UI
        ========================================= */
@@ -241,6 +260,7 @@
     
     <textarea id="advice-box"></textarea>
     
+    <button class="btn-clear" onclick="clearForm()">🧹 Clear Form</button>
     <button class="btn-print" onclick="preparePrint()">🖨️ Print Certificate</button>
   </div>
 </div>
@@ -507,6 +527,45 @@
 
     window.print();
   }
+
+  function clearForm() {
+
+  // Clear all text, number, date, textarea inputs
+  document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => el.value = "");
+
+  // Reset date to today
+  document.getElementById('pt-date').valueAsDate = new Date();
+
+  // Reset gender
+  document.getElementById('pt-gender').selectedIndex = 0;
+
+  // Uncheck all checkboxes (KCO + meds not brought)
+  document.querySelectorAll('.kco-check, #meds-not-brought').forEach(el => {
+    el.checked = false;
+    if (el.parentElement.classList.contains('kco-pill')) {
+      el.parentElement.classList.remove('active');
+    }
+  });
+
+  // Reset radio buttons
+  document.getElementById('on-tt').checked = true;
+
+  // Reset default values
+  document.getElementById('v-temp').value = "Afebrile";
+  document.getElementById('v-spo2').value = "98% with RA";
+  document.getElementById('exam-rs').value = "BSBE clear";
+  document.getElementById('exam-cvs').value = "S1S2+, no murmur";
+  document.getElementById('exam-cns').value = "Conscious, orientated";
+  document.getElementById('exam-pa').value = "Soft and NT";
+  document.getElementById('lab-urine').value = "Noted";
+  document.getElementById('lab-ecg').value = "WNL";
+  document.getElementById('lab-echo').value = "Noted";
+  document.getElementById('lab-cxr').value = "Noted";
+
+  // Clear advice and regenerate default
+  generateAdvice();
+}
+  
 </script>
 
 </body>
