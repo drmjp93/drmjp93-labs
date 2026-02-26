@@ -135,13 +135,16 @@
 </head>
 <body>
 
-<div id="auth-screen">
+<div id="auth-screen" onclick="document.getElementById('mobile-pin').focus()">
+  <input type="password" inputmode="numeric" id="mobile-pin" autofocus style="position: absolute; opacity: 0; z-index: -1;">
+  
   <div class="mac-lock-box" id="mac-lock-box">
     <div class="mac-avatar">MP</div>
     <h2>Dr. Mit Panchani</h2>
     <p class="mac-subtitle">Physician Fitness Portal</p>
   </div>
 </div>
+
 
 <div class="main-wrapper">
   <div class="left-pane">
@@ -330,49 +333,39 @@
   });
 
   
+    // ==========================================
+  // INVISIBLE KEYSTROKE AUTHENTICATION LOGIC (MOBILE & DESKTOP SAFE)
   // ==========================================
-  // INVISIBLE KEYSTROKE AUTHENTICATION LOGIC
-  // ==========================================
-  let pinBuffer = "";
   const CORRECT_PIN = "3342";
   const lockScreen = document.getElementById('auth-screen');
   const lockBox = document.getElementById('mac-lock-box');
+  const mobilePinInput = document.getElementById('mobile-pin');
 
-  document.addEventListener('keydown', function(e) {
-    // Stop listening once unlocked
-    if (lockScreen.style.display === 'none') return;
+  // Listen to the hidden input field instead of the whole document
+  mobilePinInput.addEventListener('input', function(e) {
+    let pinBuffer = this.value;
     
-    // Accept numbers only
-    if (!isNaN(e.key) && e.key.trim() !== "") {
-      if (pinBuffer.length < 4) {
-        pinBuffer += e.key;
-        
-        // Auto-check on 4th digit
-        if (pinBuffer.length === 4) {
-          if (pinBuffer === CORRECT_PIN) {
-            // Correct PIN: Scale up and fade out
-            lockBox.classList.add('unlock-scale');
-            lockScreen.classList.add('unlock-fade');
-            setTimeout(() => {
-              lockScreen.style.display = 'none';
-              document.body.style.overflow = 'auto'; // Restore scrolling
-              pinBuffer = ""; // reset security
-            }, 500);
-          } else {
-            // Incorrect PIN: macOS Shake and reset
-            lockBox.classList.remove('shake');
-            void lockBox.offsetWidth; // Force CSS reflow to restart animation
-            lockBox.classList.add('shake');
-            pinBuffer = ""; // Reset buffer instantly
-          }
-        }
+    // Auto-check on 4th digit
+    if (pinBuffer.length >= 4) {
+      if (pinBuffer === CORRECT_PIN) {
+        // Correct PIN: Scale up and fade out
+        lockBox.classList.add('unlock-scale');
+        lockScreen.classList.add('unlock-fade');
+        setTimeout(() => {
+          lockScreen.style.display = 'none';
+          document.body.style.overflow = 'auto'; // Restore scrolling
+          this.value = ""; // Reset security
+        }, 500);
+      } else {
+        // Incorrect PIN: macOS Shake and reset
+        lockBox.classList.remove('shake');
+        void lockBox.offsetWidth; // Force CSS reflow to restart animation
+        lockBox.classList.add('shake');
+        this.value = ""; // Reset buffer instantly
       }
-    } 
-    // Handle backspace gracefully
-    else if (e.key === 'Backspace') {
-      pinBuffer = pinBuffer.slice(0, -1);
     }
   });
+
 
   // ==========================================
   // FORM LOGIC
