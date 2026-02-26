@@ -41,25 +41,25 @@
     .unlock-fade { opacity: 0; visibility: hidden; }
     .unlock-scale { transform: scale(1.15); opacity: 0; }
 
-        /* clear button */
-    
+    /* clear button */
     .btn-clear {
-  background: #e2e8f0;
-  color: #1e293b;
-  border: none;
-  padding: 12px 20px;
-  font-size: 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  width: 100%;
-  margin-bottom: 10px;
-  transition: 0.2s;
-}
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      margin-bottom: 10px;
+      transition: 0.2s;
+    }
 
-.btn-clear:hover {
-  background: #cbd5e1;
-}
+    .btn-clear:hover {
+      background: #cbd5e1;
+    }
+
     /* =========================================
        MAIN APPLICATION UI
        ========================================= */
@@ -126,7 +126,7 @@
       .lab-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; width: 15%; font-weight: bold; }
       .lab-table td { width: 35%; }
       
-      #p-advice { white-space: pre-wrap; line-height: 1.5; font-weight: bold; font-size: 1rem; margin-top: 5px; }
+      #p-advice { line-height: 1.5; margin-top: 5px; }
       
       .signature-block { margin-top: 40px; text-align: right; }
       .signature-block p { margin-bottom: 2px; }
@@ -177,11 +177,14 @@
         <label class="kco-pill"><input type="checkbox" value="Epilepsy" class="kco-check" onchange="togglePill(this)"> Epilepsy</label>
         <label class="kco-pill"><input type="checkbox" value="S/P CABG" class="kco-check" onchange="togglePill(this)"> S/P CABG</label>
         <label class="kco-pill"><input type="checkbox" value="S/P PTCA" class="kco-check" onchange="togglePill(this)"> S/P PTCA</label>
+        <label class="kco-pill"><input type="checkbox" value="Chronic Steroids" class="kco-check" onchange="togglePill(this)"> Chronic Steroids</label>
+        <label class="kco-pill"><input type="checkbox" value="OSA" class="kco-check" onchange="togglePill(this)"> OSA</label>
+        <label class="kco-pill"><input type="checkbox" value="Psychiatry" class="kco-check" onchange="togglePill(this)"> Psychiatry</label>
       </div>
       <div class="grid-2" style="margin-top: 15px;">
         <div class="input-group">
           <label>Other Medical / Surgical History</label>
-          <input type="text" id="kco-other" placeholder="Any other past history" value="No any PHO Surgery" >
+          <input type="text" id="kco-other" placeholder="Any other past history" value="No PHO Surgery" >
         </div>
         <div class="input-group">
           <label>Treatment Compliance</label>
@@ -213,7 +216,7 @@
       <div class="grid-2">
         <div class="input-group">
           <label>RS <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Ronchi')">+ Ronchi</span> <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Creps')">+ Creps</span></label>
-          <input type="text" id="exam-rs" value="BSBE clear">
+          <input type="text" id="exam-rs" value="BSBE, clear">
         </div>
         <div class="input-group">
           <label>CVS <span class="exam-pill" onclick="appendExam('exam-cvs', 'Murmur +')">+ Murmur</span></label>
@@ -258,7 +261,7 @@
     <h3 style="margin-bottom: 5px;">Fitness Advice & Remarks</h3>
     <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Fully editable text. Auto-updates based on selections.</p>
     
-    <textarea id="advice-box"></textarea>
+    <div id="advice-box" contenteditable="true" style="flex-grow: 1; border: 1px solid #cbd5e1; border-radius: 4px; padding: 12px; overflow-y: auto; background: #fff; line-height: 1.5; margin-bottom: 15px;"></div>
     
     <button class="btn-clear" onclick="clearForm()">🧹 Clear Form</button>
     <button class="btn-print" onclick="preparePrint()">🖨️ Print Certificate</button>
@@ -310,12 +313,12 @@
 
 <script>
 
-        // ==========================================
+// ==========================================
   // BP SMART AUTO-FORMATTER
   // ==========================================
   document.getElementById('v-bp').addEventListener('input', function (e) {
     if (e.inputType === 'deleteContentBackward') {
-      generateNote();
+      generateAdvice(); // <--- Change this from generateNote()
       return;
     }
     let v = this.value;
@@ -323,7 +326,7 @@
     if (v.length === 3 && !v.includes('/')) {
       this.value = v + '/';
     }
-    generateNote();
+    generateAdvice(); // <--- Change this from generateNote()
   });
 
   
@@ -398,40 +401,101 @@
     }
   }
 
-  // Smart Advice Generation (Merged Paragraphs)
+// Smart Advice Generation (Merged Paragraphs)
   function generateAdvice() {
     let kco = Array.from(document.querySelectorAll('.kco-check:checked')).map(el => el.value);
     
     // Paragraph 1: Fitness Status & Merged Goals
     let fitConditions = [];
-    if (kco.includes('DM')) fitConditions.push("OHA if RBS <= 200 mg/dL");
-    if (kco.includes('HTN')) fitConditions.push("anti-hypertensive medications if BP <= 140/90 mmHg");
+    if (kco.includes('HTN')) fitConditions.push("BP <= 140/90 mmHg");
+    if (kco.includes('DM')) fitConditions.push("RBS <= 200 mg/dL");
     
-    let para1 = "Patient is FIT for surgery";
+    let para1 = "Patient is fit for surgery";
     if (fitConditions.length > 0) {
-      para1 += ` with ${fitConditions.join(" and ")} on the day of OT with due risk.`;
+      para1 += ` with due risk, if ${fitConditions.join(" & ")} on day of OT.`;
     } else {
-      para1 += " under moderate/high risk.";
+      para1 += " with due risk."; // Fallback if neither DM nor HTN is checked
     }
 
     // Paragraph 2: Medication Instructions (separated lines)
     let medInstructions = [];
+    
     if (kco.includes('DM')) {
-      medInstructions.push("Bridge with insulin according to RBS scale. Omit morning dose of OHA on the day of surgery.");
-    }
-    if (kco.includes('HTN')) {
-      medInstructions.push("AVOID ARB / ACE INHIBITOR on day of surgery; Continue rest anti-hypertensive medications (if any) on the morning of surgery with a sip of water.");
-    }
-    if (kco.includes('IHD') || kco.includes('S/P CABG') || kco.includes('S/P PTCA')) {
-      medInstructions.push("Omit Clopidogrel / Ticagrelor 5 days before surgery and resume 1 day after OT. Bridge with LMWH up to 6/8 hours before OT (as per clinical indication). Continue Tab. Aspirin (except in strict neuro/uro surgeries).");
+      // Oral Hypoglycemics & SGLT2i Guidelines
+      medInstructions.push("Diabetes (OHAs): Omit morning dose of Oral Hypoglycemic Agents on the day of surgery. *Note for Major OT: Stop SGLT2 inhibitors (e.g., Dapagliflozin, Empagliflozin) 3 to 4 days prior to major surgery to avoid euglycemic DKA.*");
+      
+      // Insulin Guidelines
+      medInstructions.push("Diabetes (Insulin): Omit short-acting/prandial insulin on the morning of surgery. Administer 50-80% of usual long-acting/basal insulin dose. Bridge with short-acting insulin sliding scale to maintain perioperative target RBS of 140-180 mg/dL.");
     }
     
-    let adviceText = para1;
-    if (medInstructions.length > 0) {
-      adviceText += "\n\nMedication Instructions:\n- " + medInstructions.join("\n- ");
+    if (kco.includes('HTN')) {
+      // What to Stop
+      medInstructions.push("Hypertension (Stop): Omit ACE Inhibitors / ARBs and Diuretics on the morning of surgery to prevent refractory perioperative hypotension and volume depletion.");
+      
+      // What to Continue
+      medInstructions.push("Hypertension (Continue): Strict continuation of Beta-blockers, Calcium Channel Blockers, or other anti-hypertensives on the morning of surgery with a sip of water.");
     }
 
-    document.getElementById('advice-box').value = adviceText;
+    // (Your existing Antiplatelet/Anticoagulant code would go here)
+    
+    if (kco.includes('IHD') || kco.includes('S/P CABG') || kco.includes('S/P PTCA')) {
+        
+        // Antiplatelet Guidelines
+        medInstructions.push("Antiplatelets: Stop Clopidogrel/Ticagrelor 5 days (Prasugrel 7 days) before surgery. Resume 24 hours post-op once hemostasis is achieved.");
+        medInstructions.push("Aspirin: Continue perioperatively (except in strict neuro, uro, or ophthalmic surgeries).");
+        
+        // Anticoagulant: Cataract / Minimal Bleeding Risk
+        medInstructions.push("Warfarin (Cataract/Minor): Continue therapy. Check INR 24-72 hours prior (target 2-3). Stop if INR > 3. No LMWH bridging required.");
+        medInstructions.push("DOACs (Cataract/Minor): Continue therapy. No bridging or blood IVx required.");
+
+        // Anticoagulant: Major Surgery / High Bleeding Risk
+        medInstructions.push("Warfarin (Major OT): Stop 5 days prior. Bridge with LMWH (1mg/kg BID) ONLY for high thrombotic risk. Stop LMWH 24h before surgery. Resume Warfarin 12-24 hours post-op. Restart LMWH 48-72 hours post-op until INR ≥ 2.0.");
+        medInstructions.push("DOACs (Major OT): Strictly avoid LMWH bridging. Standard renal function: stop 24h prior (low bleeding risk sx) or 48h prior (high bleeding risk sx). Impaired renal function (CrCl 15-50): stop 48h prior (low risk) or 72-96h prior (high risk). Resume 24h post op (Low bleeding risk sx); 48-72h (high bleeding risk sx)");
+
+    } 
+    
+    // Respiratory (Asthma/COPD)
+    if (kco.includes('Asthma') || kco.includes('COPD')) {
+      medInstructions.push("Asthma/COPD: Continue all inhalers morning of surgery; consider pre-op nebulization and avoid elective OT if active wheeze or acute exacerbation is present.");
+    }
+
+    // Thyroid Disorders
+    if (kco.includes('Thyroid Disorder') || kco.includes('Hyperthyroid') || kco.includes('Hypothyroid')) {
+      medInstructions.push("Thyroid: Continue thyroid medications morning of surgery; ensure euthyroid state (normal TSH/T3/T4) prior to elective OT to prevent thyroid storm or myxedema coma.");
+    }
+
+    // Seizure Disorder / Epilepsy
+    if (kco.includes('Epilepsy')) {
+      medInstructions.push("Seizures: Strictly continue all anti-epileptic drugs on the morning of surgery with a sip of water to prevent breakthrough perioperative seizures.");
+    }
+
+    // Chronic Kidney Disease (CKD) / Dialysis
+    if (kco.includes('CKD')) {
+      medInstructions.push("CKD/Dialysis: Schedule hemodialysis the day before elective surgery (never on the day of), and strictly avoid NSAIDs for post-op analgesia.");
+    }
+
+    // Chronic Steroid Use
+    if (kco.includes('Chronic Steroids')) {
+      medInstructions.push("Chronic Steroids: Continue morning oral steroid dose and administer intra-operative IV stress-dose hydrocortisone to prevent acute adrenal crisis.");
+    }
+
+    // Obstructive Sleep Apnea (OSA)
+    if (kco.includes('OSA')) {
+      medInstructions.push("OSA: Instruct patient to bring their personal CPAP/BiPAP machine to the hospital for immediate post-op use in the recovery room; use opioids with extreme caution.");
+    }
+
+    // Psychiatric Medications
+    if (kco.includes('Psychiatry')) {
+      medInstructions.push("Psychiatry: Stop Lithium 24-48 hours prior to major surgery to avoid toxicity; continue SSRIs/SNRIs on the morning of surgery.");
+    }
+
+    let adviceHTML = `<span style="font-weight: bold; font-size: 1rem;">${para1}</span>`;
+    
+    if (medInstructions.length > 0) {
+      adviceHTML += `<br><br><span style="font-weight: normal; font-size: 0.85rem;"><strong>Medication Instructions:</strong><br>• ` + medInstructions.join("<br>• ") + `</span>`;
+    }
+
+    document.getElementById('advice-box').innerHTML = adviceHTML;
   }
 
   // Run on load to set default advice text
@@ -523,15 +587,15 @@
     document.getElementById('dynamic-lab-table').innerHTML = tableHTML;
 
     // 6. Advice
-    document.getElementById('p-advice').innerText = document.getElementById('advice-box').value;
+    document.getElementById('p-advice').innerHTML = document.getElementById('advice-box').innerHTML;
 
     window.print();
   }
 
   function clearForm() {
 
-  // Clear all text, number, date, textarea inputs
-  document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => el.value = "");
+  // Clear all text, number, date inputs
+  document.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => el.value = "");
 
   // Reset date to today
   document.getElementById('pt-date').valueAsDate = new Date();
