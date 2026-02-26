@@ -1,0 +1,103 @@
+Paste this in <script>
+
+
+
+// ==========================================
+// AGE-ADAPTIVE DIASTOLIC BRAIN (Modified ASE)
+// ==========================================
+function getDiastolicGrade() {
+    const age = parseInt(document.getElementById('pt-age').value) || 45;
+    const mvE = parseFloat(document.getElementById('mv-e').value); 
+    const mvA = parseFloat(document.getElementById('mv-a').value);
+    const ee = parseFloat(document.getElementById('ee').value);    // Lateral E/e'
+    const trV = parseFloat(document.getElementById('tr-v').value) || 0;
+    const la = parseFloat(document.getElementById('la').value) || 0;
+
+    // Exit if core Doppler values are missing
+    if (isNaN(mvE) || isNaN(ee)) return "";
+
+    // Calculation: Derive Lateral e' (cm/s) and E/A Ratio
+    const ePrime = (mvE * 100) / ee; 
+    const eaRatio = mvE / (mvA || 1);
+
+    // Age-Based Thresholds
+    let eaAbnormal, ePrimeAbnormal, laAbnormal, ageBadge;
+    
+    if (age > 65) {
+        eaAbnormal = eaRatio < 0.7;
+        ePrimeAbnormal = ePrime < 8;
+        laAbnormal = la > 42;
+        ageBadge = "Elderly (>65y)";
+    } else if (age < 40) {
+        eaAbnormal = eaRatio < 1.0;
+        ePrimeAbnormal = ePrime < 12;
+        laAbnormal = la > 40;
+        ageBadge = "Young (<40y)";
+    } else { // 40-65 years
+        eaAbnormal = eaRatio < 0.8;
+        ePrimeAbnormal = ePrime < 10;
+        laAbnormal = la > 40;
+        ageBadge = "Middle Age (40-65y)";
+    }
+
+    const trAbnormal = trV > 2.8;
+    const eeAbnormal = ee > 13; // Lateral E/e' cutoff
+
+    // Count Criteria for Grade II/III check
+    let posPoints = 0;
+    if (eeAbnormal) posPoints++;
+    if (laAbnormal) posPoints++;
+    if (trAbnormal) posPoints++;
+
+    // Final Grading Logic
+    let grade = "";
+    let color = "#ea580c"; // Theme Orange
+
+    if (eaRatio >= 2.0) {
+        grade = "Grade III Diastolic Dysfunction (Restrictive pattern)";
+    } 
+    else if (eaRatio < 0.8 && mvE <= 0.5) { 
+        grade = "Grade I Diastolic Dysfunction (Impaired Relaxation)";
+    }
+    else if (eaRatio >= 0.8 && posPoints >= 2) {
+        grade = "Grade II Diastolic Dysfunction (Pseudonormal pattern)";
+    }
+    else if (!eaAbnormal && posPoints < 2) {
+        if (age > 65 && eaRatio < 0.9) {
+            grade = "Normal Diastolic Filling (Age-appropriate)";
+        } else {
+            grade = "Normal Diastolic Function";
+        }
+        color = "#10b981"; // Green
+    }
+    else {
+        grade = "Indeterminate Diastolic Pattern";
+    }
+
+    return `
+    <div style="margin-top:15px; padding:12px; border-left:4px solid ${color}; background:#fdfcfb; font-size:14px; line-height:1.5;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <b style="color:${color}; text-transform:uppercase; letter-spacing:0.5px;">Diastolic Assessment</b>
+            <span style="font-size:10px; background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#64748b;">${ageBadge}</span>
+        </div>
+        <div style="font-weight:700;">${grade}</div>
+        <div style="font-size:11px; color:#64748b; margin-top:5px;">
+            Derived e': ${ePrime.toFixed(1)} cm/s | E/A: ${eaRatio.toFixed(2)} | Lateral E/e': ${ee}
+        </div>
+    </div>`;
+}
+
+
+2. The Trigger (Update this in runLiveEngine)
+Find the block where your server response is handled and replace the innerHTML line as shown:
+
+
+if (result.conclusion) {
+    // 1. Generate the Diastolic line
+    const diastolicSection = getDiastolicGrade();
+    
+    // 2. Update the conclusion div by appending the result at the end
+    document.getElementById('conclusion').innerHTML = result.conclusion + diastolicSection;
+}
+
+
