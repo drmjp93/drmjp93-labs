@@ -366,6 +366,67 @@
     }
   });
 
+  // ==========================================
+  // AUTO-SAVE LOGIC (LOCALSTORAGE)
+  // ==========================================
+  function saveDraft() {
+    const formData = {};
+    
+    // Save all inputs and dropdowns
+    document.querySelectorAll('input, select').forEach(el => {
+      if (el.type === 'checkbox' || el.type === 'radio') {
+         let key = el.id || el.value; // For KCO pills without IDs
+         formData[key] = el.checked;
+      } else if (el.id) {
+         formData[el.id] = el.value;
+      }
+    });
+    
+    // Save rich text advice box
+    formData['advice-box'] = document.getElementById('advice-box').innerHTML;
+    
+    localStorage.setItem('fitnessDraft', JSON.stringify(formData));
+  }
+
+  function loadDraft() {
+    const saved = localStorage.getItem('fitnessDraft');
+    
+    if (saved) {
+      const formData = JSON.parse(saved);
+      
+      document.querySelectorAll('input, select').forEach(el => {
+        if (el.type === 'checkbox' || el.type === 'radio') {
+           let key = el.id || el.value;
+           if (formData[key] !== undefined) el.checked = formData[key];
+           
+           // Restore visual active class on KCO pills
+           if (el.classList.contains('kco-check')) {
+             if (el.checked) el.parentElement.classList.add('active');
+             else el.parentElement.classList.remove('active');
+           }
+        } else if (el.id && formData[el.id] !== undefined) {
+           el.value = formData[el.id];
+        }
+      });
+      
+      // Restore rich text
+      if (formData['advice-box'] !== undefined) {
+        document.getElementById('advice-box').innerHTML = formData['advice-box'];
+      }
+    } else {
+      // Default setup if no draft exists
+      document.getElementById('pt-date').valueAsDate = new Date();
+      generateAdvice();
+    }
+  }
+
+  // Trigger Save on any interaction
+  document.addEventListener('input', saveDraft);
+  document.addEventListener('change', saveDraft);
+  document.getElementById('advice-box').addEventListener('input', saveDraft); 
+  
+  // Load draft automatically when page opens
+  window.addEventListener('DOMContentLoaded', loadDraft);
 
   // ==========================================
   // FORM LOGIC
@@ -392,6 +453,7 @@
     } else {
       input.value += ", " + text;
     }
+    saveDraft();
   }
 
 // Smart Advice Generation (Merged Paragraphs)
@@ -489,6 +551,7 @@
     }
 
     document.getElementById('advice-box').innerHTML = adviceHTML;
+    saveDraft();
   }
 
   // Run on load to set default advice text
@@ -586,6 +649,10 @@
   }
 
   function clearForm() {
+
+  // Wipe out localStorage memory
+  localStorage.removeItem('fitnessDraft');
+
 
   // Clear all text, number, date inputs
   document.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => el.value = "");
