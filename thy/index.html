@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Thyroid Clinic - Auto Note</title>
+  <title>Hypothyroid Clinic</title>
   <style>
     /* =========================================
        APPLICATION UI
@@ -29,7 +29,13 @@
     /* --- MAIN LAYOUT --- */
     .main-wrapper { display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
     .left-pane { flex: 2; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-    .right-pane { flex: 1; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); position: sticky; top: 20px; display: flex; flex-direction: column; height: calc(100vh - 40px); }
+
+
+.right-pane { flex: 1; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); position: sticky; top: 20px; display: flex; flex-direction: column; }
+    
+    /* ... skipping some lines ... */
+    
+
 
     h2, h3 { color: var(--accent); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
     .section { margin-bottom: 25px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fafafa; }
@@ -43,7 +49,7 @@
     label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
     input[type="text"], input[type="number"], input[type="date"], select, textarea { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95rem; }
     
-    textarea { flex-grow: 1; resize: none; font-size: 1rem; padding: 15px; line-height: 1.6; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; }
+    textarea { overflow-y: hidden; min-height: 200px; resize: none; font-size: 1rem; padding: 15px; line-height: 1.6; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; transition: height 0.2s ease; }
 
     .btn-print { background: var(--accent); color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; margin-bottom: 10px; }
     .btn-print:hover { background: #0369a1; }
@@ -62,7 +68,7 @@
     #print-area { display: none; }
     
     @media print {
-      @page { size: A4; margin: 25mm 15mm 15mm 15mm;}
+      @page { size: A4; margin: 0mm 15mm 15mm 15mm;}
       
       body { 
         background: white !important; padding: 0 !important; margin: 0 !important; 
@@ -71,9 +77,13 @@
       
       #auth-screen, .main-wrapper { display: none !important; }
 
-      #print-area { 
-        display: block !important; position: relative !important;
-        padding-top: 15mm !important; width: 100%;
+     #print-area { 
+        display: block !important; 
+        padding-top: 30mm !important; /* 3cm header + 5mm breathing room */
+        padding-left: 15mm !important;
+        padding-right: 15mm !important;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .print-header-line {
@@ -135,36 +145,43 @@
 
 <div class="main-wrapper">
   <div class="left-pane">
-    <h2>Thyroid OPD Automator</h2>
+    <h2>Hypothyroid OPD</h2>
 
     <div class="section">
-      <div class="grid-5">
+      <div class="grid-3">
+        <div class="input-group"><label>Date</label><input type="date" id="pt-date" onchange="generateNote()"></div>
+        <div class="input-group"><label>Gender</label>
+          <select id="pt-gender" onchange="generateNote()">
+            <option>Female</option>
+            <option>Male</option>
+          </select>
+        </div>
+     <div class="input-group"><label>Diagnosis</label>
+          <select id="pt-dx" onchange="generateNote()">
+            <option value="K/C/O Hypothyroid">K/C/O Hypothyroid</option>
+            <option value="Post-Op Hypothyroid">Post-Op Hypothyroid</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top: 15px;">
         <div class="input-group"><label>Patient Name</label> <input type="text" id="pt-name" oninput="this.value = this.value.toUpperCase(); generateNote();"> </div>
         <div class="input-group"><label>Age</label><input type="number" id="pt-age" oninput="generateNote()"></div>
-        <div class="input-group"><label>Gender</label><select id="pt-gender" onchange="generateNote()"><option>Female</option><option>Male</option></select></div>
         <div class="input-group"><label>MOA (Pregnancy)</label><input type="text" id="pt-moa" placeholder="e.g. 3 months" oninput="generateNote()"></div>
-        <div class="input-group"><label>Date</label><input type="date" id="pt-date" onchange="generateNote()"></div>
       </div>
     </div>
 
     <div class="section">
       <div class="grid-3">
-        <div class="input-group"><label>Diagnosis</label>
-          <select id="pt-dx" onchange="generateNote()">
-            <option value="K/C/O Hypothyroid">K/C/O Hypothyroid</option>
-            <option value="K/C/O Hyperthyroid">K/C/O Hyperthyroid</option>
-          </select>
-        </div>
+        <div class="input-group"><label>Weight (kg)</label><input type="number" id="pt-wt" oninput="generateNote()"></div>
+        <div class="input-group"><label>BP (mmHg)</label><input type="text" id="pt-bp" placeholder="e.g. 120/80"></div>
+        <div class="input-group"><label>HR (/min)</label><input type="number" id="pt-hr" oninput="generateNote()"></div>
+      </div>
+      <div class="grid-2" style="margin-top: 15px;">
+        <div class="input-group"><label>S. TSH (µIU/mL)</label><input type="number" id="pt-tsh" step="0.01" oninput="generateNote()"></div>
         <div class="input-group">
           <label>Current Dose (e.g., 100 2 tabs Sun)</label>
           <input type="text" id="pt-dose" oninput="generateNote()">
         </div>
-        <div class="input-group"><label>Weight (kg)</label><input type="number" id="pt-wt" oninput="generateNote()"></div>
-      </div>
-      <div class="grid-3" style="margin-top: 15px;">
-        <div class="input-group"><label>BP (mmHg)</label><input type="text" id="pt-bp" placeholder="e.g. 120/80"></div>
-        <div class="input-group"><label>HR (/min)</label><input type="number" id="pt-hr" oninput="generateNote()"></div>
-        <div class="input-group"><label>S. TSH (µIU/mL)</label><input type="number" id="pt-tsh" step="0.01" oninput="generateNote()"></div>
       </div>
     </div>
 
@@ -196,8 +213,7 @@
   <div class="right-pane">
     <h3 style="margin-bottom: 5px;">Clinical Note & Rx</h3>
     <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Fully editable. Paste to EMR or Print.</p>
-    <textarea id="note-box" oninput="saveFormData()"></textarea>
-    <div style="display: flex; flex-direction: column;">
+<textarea id="note-box" oninput="saveFormData(); autoResizeText();"></textarea>    <div style="display: flex; flex-direction: column;">
       <button class="btn-copy" onclick="copyNote()" id="copy-btn">📋 Copy Note</button>
       <button class="btn-print" onclick="preparePrint()">🖨️ Print Prescription</button>
       <button class="btn-clear" onclick="clearPatient()">🗑️ Clear for Next Patient</button>
@@ -244,6 +260,16 @@
 </div>
 
 <script>
+
+  // ==========================================
+  // AUTO-RESIZE TEXTAREA LOGIC
+  // ==========================================
+  function autoResizeText() {
+    const tx = document.getElementById('note-box');
+    tx.style.height = 'auto'; 
+    tx.style.height = (tx.scrollHeight) + 'px';
+  }
+  
   // ==========================================
   // INVISIBLE KEYSTROKE AUTHENTICATION LOGIC
   // ==========================================
@@ -324,17 +350,17 @@
             note += "TSH is rasied. Poor compliance present. \nCounselled patient regarding strict empty stomach morning dosing and avoiding food/tea for 45 minutes.\n";
             newDoseStr = dose ? ensureMcg(dose) : "____ mcg";
           } else {
-            note += "TSH is raised. Patient denies poor compliance. \Dose adjustment needed.\n";
+            note += "TSH is raised. Patient denies poor compliance. \n";
             newDoseStr = !isNaN(doseNum) ? (doseNum + 12.5) + " TO " + (doseNum + 25) + " mcg" : "____ mcg";
           }
         } else {
-          note += "TSH is suppressed below normal limits. \nDose adjustment needed to prevent iatrogenic thyrotoxicosis.\n";
+          note += "TSH is suppressed below normal limits. \n";
           newDoseStr = !isNaN(doseNum) ? (doseNum - 12.5) + " TO " + (doseNum - 25) + " mcg" : "____ mcg";
         }
       } else {
         compBox.classList.remove('active'); 
         tshInput.classList.remove('tsh-abnormal');
-        note += "TSH is under control). \nNo active dose titration required.\n";
+        note += "TSH is under control. \n";
         newDoseStr = dose ? ensureMcg(dose) : "____ mcg";
       }
     } else {
@@ -352,8 +378,9 @@
       note += `\nADV:\n- TAB. THYROXINE ${finalRxDose}${durationText} \n  (1 TABLET OD EMPTY STOMACH IN THE MORNING)`;
     }
 
-    document.getElementById('note-box').value = note;
+   document.getElementById('note-box').value = note;
     saveFormData();
+    autoResizeText(); // Forces the box to wrap around the newly generated text
   }
 
   // ==========================================
