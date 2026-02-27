@@ -62,7 +62,7 @@
     #print-area { display: none; }
     
     @media print {
-      @page { size: A4; margin: 15mm 15mm 15mm 15mm; 
+      @page { size: A4; margin: 25mm 15mm 15mm 15mm;}
       
       body { 
         background: white !important; padding: 0 !important; margin: 0 !important; 
@@ -102,7 +102,13 @@
       .pv-ref { font-size: 7pt; color: #666; margin-top: 2px; font-weight: normal; }
 
       .print-rx-body { margin-top: 10px; padding-left: 5px; min-height: 450px; }
-      .rx-logo { font-family: "Times New Roman", serif; font-size: 4rem; line-height: 1; margin-bottom: 20px; color: #000; }
+      .rx-logo { 
+          font-family: "Times New Roman", serif; 
+          font-size: 2rem; /* REDUCED FROM 4rem */
+          line-height: 1; 
+          margin-bottom: 10px; /* REDUCED SPACING */
+          color: #000; 
+        }
       .rx-content { font-size: 13pt; line-height: 1.8; white-space: pre-wrap; padding-left: 15px; color: #111; }
 
       .print-footer {
@@ -133,7 +139,7 @@
 
     <div class="section">
       <div class="grid-5">
-        <div class="input-group"><label>Patient Name</label><input type="text" id="pt-name" oninput="generateNote()"></div>
+        <div class="input-group"><label>Patient Name</label> <input type="text" id="pt-name" oninput="this.value = this.value.toUpperCase(); generateNote();"> </div>
         <div class="input-group"><label>Age</label><input type="number" id="pt-age" oninput="generateNote()"></div>
         <div class="input-group"><label>Gender</label><select id="pt-gender" onchange="generateNote()"><option>Female</option><option>Male</option></select></div>
         <div class="input-group"><label>MOA (Pregnancy)</label><input type="text" id="pt-moa" placeholder="e.g. 3 months" oninput="generateNote()"></div>
@@ -274,8 +280,8 @@
     generateNote();
   });
 
-  // ==========================================
-  // THYROID LOGIC ENGINE
+ // ==========================================
+  // THYROID LOGIC ENGINE (CORRECTED)
   // ==========================================
   function generateNote() {
     const dx = document.getElementById('pt-dx').value;
@@ -288,11 +294,19 @@
     const compBox = document.getElementById('compliance-box');
     const tshInput = document.getElementById('pt-tsh');
 
-    let doseText = dose ? (dose.toLowerCase().includes('mcg') || dose.toLowerCase().includes('µg') ? dose : dose + ' mcg') : '____ mcg';
+    // HELPER TO ENSURE MCG IS PRESENT
+    const ensureMcg = (val) => {
+      if (!val) return "";
+      let s = val.toString().toLowerCase();
+      if (s.includes('mcg') || s.includes('µg')) return val;
+      return val + " mcg";
+    };
+
+    let doseText = dose ? ensureMcg(dose) : '____ mcg';
     
-    // Core Note Initialization
-    let note = `${dx} on Tab. Thyroxine ${doseText}`;
-    if (moa) { note += `\n* Patient is Pregnant (MOA: ${moa})`; }
+    // CORE NOTE INITIALIZATION
+    let note = `${dx} ON TAB. THYROXINE ${doseText}`;
+    if (moa) { note += `\n* PATIENT IS PREGNANT (MOA: ${moa})`; }
     note += `\n\n`;
 
     let doseMatch = dose ? dose.match(/(\d+(\.\d+)?)/) : null;
@@ -302,38 +316,43 @@
     if (tshStr) {
       let tsh = parseFloat(tshStr);
       if (tsh > 4.5 || tsh < 0.5) {
-        compBox.classList.add('active'); tshInput.classList.add('tsh-abnormal');
+        compBox.classList.add('active'); 
+        tshInput.classList.add('tsh-abnormal');
+        
         if (tsh > 4.5) {
           if (compPoor) {
-            note += "TSH is raised. Poor compliance present. \nCounselled patient regarding strict empty stomach morning dosing and avoiding food/tea for 45 minutes.\n";
-            newDoseStr = dose ? doseText : "____";
+            note += "TSH is rasied. Poor compliance present. \nCounselled patient regarding strict empty stomach morning dosing and avoiding food/tea for 45 minutes.\n";
+            newDoseStr = dose ? ensureMcg(dose) : "____ mcg";
           } else {
-            note += "TSH is raised. Patient denies poor compliance. \nDose adjustment needed.\n";
-            newDoseStr = !isNaN(doseNum) ? (doseNum + 12.5) + " to " + (doseNum + 25) + " mcg" : "____ mcg";
+            note += "TSH is raised. Patient denies poor compliance. \Dose adjustment needed.\n";
+            newDoseStr = !isNaN(doseNum) ? (doseNum + 12.5) + " TO " + (doseNum + 25) + " mcg" : "____ mcg";
           }
         } else {
           note += "TSH is suppressed below normal limits. \nDose adjustment needed to prevent iatrogenic thyrotoxicosis.\n";
-          newDoseStr = !isNaN(doseNum) ? (doseNum - 12.5) + " to " + (doseNum - 25) + " mcg" : "____ mcg";
+          newDoseStr = !isNaN(doseNum) ? (doseNum - 12.5) + " TO " + (doseNum - 25) + " mcg" : "____ mcg";
         }
       } else {
-        compBox.classList.remove('active'); tshInput.classList.remove('tsh-abnormal');
-        note += "TSH is WNL (Well controlled). \nNo active dose titration required.\n";
-        newDoseStr = dose ? doseText : "____ mcg";
+        compBox.classList.remove('active'); 
+        tshInput.classList.remove('tsh-abnormal');
+        note += "TSH is under control). \nNo active dose titration required.\n";
+        newDoseStr = dose ? ensureMcg(dose) : "____ mcg";
       }
     } else {
-      compBox.classList.remove('active'); tshInput.classList.remove('tsh-abnormal');
+      compBox.classList.remove('active'); 
+      tshInput.classList.remove('tsh-abnormal');
     }
 
-    let finalRxDose = manualRx ? manualRx : newDoseStr;
+    // APPLY FINAL DOSE AND ENSURE UNIT IS ADDED
+    let finalRxDose = manualRx ? ensureMcg(manualRx) : newDoseStr;
     
-    note += `\nDietary Advice:\n- Use iodised salt (Tata, Nirma, etc.); avoid Sindha namak (non-iodised)\n- Avoid Cabbage / Cauliflower (કોબી / ફુલાવર)\n`;
+    note += `\nDIETARY ADVICE:\n- Use iodised salt (tata, nirma, etc.); avoid sindha namak (non-iodised)\n- Avoid cabbage / cauliflower (કોબી / ફુલાવર)\n`;
 
     if (finalRxDose) {
-      let durationText = duration ? ` for ${duration}` : '';
-      note += `\nAdv:\n- Tab. Thyroxine ${finalRxDose}${durationText} \n  (1 tablet OD empty stomach in the morning)`;
+      let durationText = duration ? ` FOR ${duration}` : '';
+      note += `\nADV:\n- TAB. THYROXINE ${finalRxDose}${durationText} \n  (1 TABLET OD EMPTY STOMACH IN THE MORNING)`;
     }
+
     document.getElementById('note-box').value = note;
-    
     saveFormData();
   }
 
