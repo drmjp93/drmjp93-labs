@@ -329,7 +329,11 @@
 
     <div class="conclusion-section panel">
       <h3 style="margin-bottom:5px">REPORT <span id="loader" style="display:none; font-size:.75rem; color:var(--accent)" class="loading-pulse">Calculating...</span></h3>
-      <div style="font-size:.75rem; color:#64748b; margin-bottom:10px">(Auto-updates)</div>
+      <div class="toolbar" style="margin-bottom: 5px; display: flex; gap: 5px;">
+          <button class="btn-small" onclick="format('bold')" style="font-weight: bold;">B</button>
+          <button class="btn-small" onclick="format('italic')" style="font-style: italic;">I</button>
+          <button class="btn-small" onclick="format('underline')"><u>U</u></button>
+      </div>
       <div id="conclusion" class="smart-editor" contenteditable="true"></div>
     </div>
 
@@ -785,7 +789,20 @@
       document.getElementById('p-conclusion-1').innerHTML = document.getElementById('conclusion').innerHTML;
     }
   });
+// FUNCTION TO APPLY BOLD/ITALIC/UNDERLINE
+function format(command) {
+  document.execCommand(command, false, null);
+  document.getElementById('conclusion').focus();
+  runLiveEngine(); // ENSURE THE CHANGES SYNC WITH YOUR PREVIEW
+}
 
+// ALLOW HOTKEYS (CTRL+B, CTRL+I) INSIDE THE EDITOR
+document.getElementById('conclusion').addEventListener('keydown', function(e) {
+  if (e.ctrlKey && (e.key === 'b' || e.key === 'i' || e.key === 'u')) {
+    // THE BROWSER HANDLES THE BOLDING, BUT WE NEED TO TRIGGER THE SAVE
+    setTimeout(runLiveEngine, 10);
+  }
+});
 </script>
 </body>
 </html>
