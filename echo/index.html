@@ -327,15 +327,24 @@
       </div>
     </div>
 
-    <div class="conclusion-section panel">
-      <h3 style="margin-bottom:5px">REPORT <span id="loader" style="display:none; font-size:.75rem; color:var(--accent)" class="loading-pulse">Calculating...</span></h3>
-      <div class="toolbar" style="margin-bottom: 5px; display: flex; gap: 5px;">
-          <button class="btn-small" onclick="format('bold')" style="font-weight: bold;">B</button>
-          <button class="btn-small" onclick="format('italic')" style="font-style: italic;">I</button>
-          <button class="btn-small" onclick="format('underline')"><u>U</u></button>
-      </div>
-      <div id="conclusion" class="smart-editor" contenteditable="true"></div>
-    </div>
+<div class="conclusion-section panel">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+    <h3 style="margin:0">REPORT <span id="loader" style="display:none; font-size:.75rem; color:var(--accent)" class="loading-pulse">Calculating...</span></h3>
+    
+    <button id="lock-btn" type="button" onclick="toggleManualLock()" style="background: #ea580c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold;">
+      🔓 AUTO-SYNC: ON
+    </button>
+  </div>
+
+  <div class="toolbar" style="margin-bottom: 8px; display: flex; gap: 5px; background: #f1f5f9; padding: 5px; border-radius: 4px;">
+    <button type="button" class="btn-small" onclick="format('bold')" style="font-weight: bold; cursor: pointer; padding: 2px 8px; border: 1px solid #cbd5e1;">B</button>
+    <button type="button" class="btn-small" onclick="format('italic')" style="font-style: italic; cursor: pointer; padding: 2px 8px; border: 1px solid #cbd5e1;">I</button>
+    <button type="button" class="btn-small" onclick="format('underline')" style="cursor: pointer; padding: 2px 8px; border: 1px solid #cbd5e1;"><u>U</u></button>
+    <span id="lock-status-text" style="font-size: 0.65rem; color: #64748b; align-self: center; margin-left: auto;">ENGINE ACTIVE</span>
+  </div>
+
+  <div id="conclusion" class="smart-editor" contenteditable="true" style="min-height: 150px; border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; background: white; outline: none;"></div>
+</div>
 
   </div>
 </div>
@@ -405,7 +414,91 @@
 </div>
 
 <script>
+
+ // 1. GLOBAL STATE (PLACE AT THE TOP OF YOUR SCRIPT TAG)
+let isManualLocked = false;
+
+// 2. LOCK TOGGLE FUNCTION
+function toggleManualLock() {
+    isManualLocked = !isManualLocked;
+    const btn = document.getElementById('lock-btn');
+    const statusTxt = document.getElementById('lock-status-text');
+
+    if (isManualLocked) {
+        btn.innerHTML = "🔒 MANUAL MODE";
+        btn.style.background = "#64748b"; // GREY
+        if(statusTxt) statusTxt.innerHTML = "AUTO-SYNC PAUSED";
+    } else {
+        btn.innerHTML = "🔓 AUTO-SYNC: ON";
+        btn.style.background = "#ea580c"; // ORANGE
+        if(statusTxt) statusTxt.innerHTML = "ENGINE ACTIVE";
+        runLiveEngine(); 
+    }
+}
+
+// 3. FORMATTING FUNCTION (B, I, U)
+function format(command) {
+    // LOCK BEFORE BOLDING SO THE API DOESN'T STEAL THE FOCUS
+    if (!isManualLocked) toggleManualLock();
+    
+    document.execCommand(command, false, null);
+    document.getElementById('conclusion').focus();
+    saveFormState(); 
+}
+
+// 4. THE ENGINE (STOPS THE AUTO-OVERWRITE)
+async function runLiveEngine() {
+    // VITAL: IF LOCKED, EXIT IMMEDIATELY
+    if (isManualLocked) return; 
+
+    saveFormState();
+    const loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'inline-block';
+
+    // ... YOUR EXISTING PAYLOAD CODE ...
+
+    clearTimeout(window.debounceTimer);
+    window.debounceTimer = setTimeout(async () => {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                
+                // VITAL: ONLY UPDATE IF THE USER DIDN'T LOCK IT WHILE WAITING FOR API
+                if (result.conclusion && !isManualLocked) {
+                    document.getElementById('conclusion').innerHTML = result.conclusion;
+                }
+                
+                // UPDATE NUMBERS (ALWAYS ALLOWED)
+                if (result.calculated) {
+                   Object.keys(result.calculated).forEach(id => {
+                       const el = document.getElementById(id);
+                       if(el) el.value = result.calculated[id];
+                   });
+                }
+            }
+        } catch (e) { console.error(e); }
+        if (loader) loader.style.display = 'none';
+    }, 600);
+}
+
+// 5. AUTO-LOCK ON TYPING
+document.getElementById('conclusion').addEventListener('keydown', function(e) {
+    // IF TYPING OR CTRL+B/I/U
+    const isFormatting = e.ctrlKey && (e.key === 'b' || e.key === 'i' || e.key === 'u');
+    const isTyping = e.key.length === 1 && !e.ctrlKey && !e.metaKey;
+
+    if (isFormatting || isTyping) {
+        if (!isManualLocked) toggleManualLock();
+    }
+});
   const API_URL = "https://heroic-sherbet-80c87b.netlify.app/.netlify/functions/echo-brain";
+
 
   // ==========================================
   // CLOCK & LOCK SCREEN LOGIC
@@ -789,20 +882,7 @@
       document.getElementById('p-conclusion-1').innerHTML = document.getElementById('conclusion').innerHTML;
     }
   });
-// FUNCTION TO APPLY BOLD/ITALIC/UNDERLINE
-function format(command) {
-  document.execCommand(command, false, null);
-  document.getElementById('conclusion').focus();
-  runLiveEngine(); // ENSURE THE CHANGES SYNC WITH YOUR PREVIEW
-}
 
-// ALLOW HOTKEYS (CTRL+B, CTRL+I) INSIDE THE EDITOR
-document.getElementById('conclusion').addEventListener('keydown', function(e) {
-  if (e.ctrlKey && (e.key === 'b' || e.key === 'i' || e.key === 'u')) {
-    // THE BROWSER HANDLES THE BOLDING, BUT WE NEED TO TRIGGER THE SAVE
-    setTimeout(runLiveEngine, 10);
-  }
-});
 </script>
 </body>
 </html>
