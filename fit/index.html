@@ -73,6 +73,11 @@
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .compact-lab { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .compact-lab label { background: #f1f5f9; padding: 6px 4px; margin: 0; font-size: 0.75rem; border-right: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-width: 45px; font-weight: bold; color: #475569;}
+    .compact-lab input { border: none; padding: 6px; font-size: 0.85rem; width: 100%; border-radius: 0; outline: none; }
+    .compact-lab input:focus { background: #f0f9ff; }
     .input-group { display: flex; flex-direction: column; }
     label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
     input[type="text"], input[type="number"], input[type="date"], select, textarea { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95rem; }
@@ -96,7 +101,7 @@
        ========================================= */
 
     @media print {
-      @page { size: A4; margin: 25mm 15mm 15mm 15mm; }
+      @page { size: A4; margin: 0mm 15mm 15mm 15mm; }
       
       body { 
         background: white; padding: 0; 
@@ -107,11 +112,13 @@
 
       #auth-screen, .main-wrapper { display: none !important; }
       
-      /* THIS IS THE FIX: Physically pushes content down 30mm */
-      #print-area { 
+   #print-area { 
         display: block !important; 
-        padding-top: 15mm !important; 
+        padding-top: 30mm !important; /* 3cm header + 5mm breathing room */
+        padding-left: 15mm !important;
+        padding-right: 15mm !important;
         width: 100%;
+        box-sizing: border-box;
       }
       
       .print-header { text-align: center; margin-bottom: 15px; }
@@ -150,18 +157,18 @@
   <div class="left-pane">
     <h2>Pre-Op Physician Fitness Form</h2>
 
-    <div class="section">
+ <div class="section">
       <div class="grid-4">
+        <div class="input-group"><label>Date</label><input type="date" id="pt-date"></div>
+        <div class="input-group"><label>Gender</label>
+          <select id="pt-gender"><option>MALE</option><option>FEMALE</option><option>OTHER</option></select>
+        </div>
         <div class="input-group"><label>Patient Name</label><input type="text" id="pt-name" oninput="this.value = this.value.toUpperCase()"></div>
         <div class="input-group"><label>Age</label><input type="number" id="pt-age"></div>
-        <div class="input-group"><label>Gender</label>
-          <select id="pt-gender"><option>Male</option><option>Female</option><option>Other</option></select>
-        </div>
-        <div class="input-group"><label>Date</label><input type="date" id="pt-date"></div>
       </div>
       <div class="input-group" style="margin-top: 15px;">
         <label>Planned Procedure / OT Name</label>
-        <input type="text" id="pt-ot" placeholder="e.g. Laparoscopic Cholecystectomy" oninput="this.value = this.value.toUpperCase()">
+        <input type="text" id="pt-ot" placeholder="E.G. LAPAROSCOPIC CHOLECYSTECTOMY" oninput="this.value = this.value.toUpperCase()">
       </div>
     </div>
 
@@ -184,11 +191,20 @@
         <label class="kco-pill"><input type="checkbox" value="OSA" class="kco-check" onchange="togglePill(this)"> OSA</label>
         <label class="kco-pill"><input type="checkbox" value="Psychiatry" class="kco-check" onchange="togglePill(this)"> Psychiatry</label>
       </div>
+
+
       <div class="grid-2" style="margin-top: 15px;">
+
         <div class="input-group">
-          <label>Other Medical / Surgical History</label>
-          <input type="text" id="kco-other" placeholder="Any other past history" value="No PHO Surgery" >
+          <label style="display: flex; justify-content: space-between; align-items: center;">
+            Other Medical / Surgical History
+            <label style="font-weight: normal; font-size: 0.95rem; color: #b91c1c; cursor: pointer; margin: 0;">
+              <input type="checkbox" id="docs-not-avail" onchange="saveDraft()"> Docs not available
+            </label>
+          </label>
+          <input type="text" id="kco-other" placeholder="Any other past history" value="No PHO Surgery">
         </div>
+
         <div class="input-group">
           <label>Treatment Compliance</label>
           <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
@@ -206,63 +222,59 @@
       </div>
     </div>
 
-    <div class="section">
+<div class="section">
       <h3>Vitals & Examination</h3>
-      <div class="grid-4" style="margin-bottom: 15px;">
-        <div class="input-group"><label>Temp</label><input type="text" id="v-temp" value="Afebrile"></div>
-        <div class="input-group"><label>Pulse (bpm)</label><input type="text" id="v-pr"></div>
-        <div class="input-group"><label>Resp Rate (cpm)</label><input type="text" id="v-rr"></div>
-        <div class="input-group"><label>BP (mmHg)</label><input type="text" id="v-bp"></div>
-        <div class="input-group"><label>SpO2 (%)</label><input type="text" id="v-spo2" value="98% with RA"></div>
-      </div>
-
       <div class="grid-2">
-        <div class="input-group">
-          <label>RS <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Ronchi')">+ Ronchi</span> <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Creps')">+ Creps</span></label>
-          <input type="text" id="exam-rs" value="BSBE, clear">
+        <div style="display: flex; flex-direction: column; gap: 12px; border-right: 1px solid #e2e8f0; padding-right: 15px;">
+          <div class="input-group"><label>Temp</label><input type="text" id="v-temp" class="arrow-nav-left" value="Afebrile"></div>
+          <div class="input-group"><label>Pulse (bpm)</label><input type="text" id="v-pr" class="arrow-nav-left"></div>
+          <div class="input-group"><label>Resp Rate (cpm)</label><input type="text" id="v-rr" class="arrow-nav-left"></div>
+          <div class="input-group"><label>BP (mmHg)</label><input type="text" id="v-bp" class="arrow-nav-left"></div>
+          <div class="input-group"><label>SpO2 (%)</label><input type="text" id="v-spo2" class="arrow-nav-left" value="98% with RA"></div>
         </div>
-        <div class="input-group">
-          <label>CVS <span class="exam-pill" onclick="appendExam('exam-cvs', 'Murmur +')">+ Murmur</span></label>
-          <input type="text" id="exam-cvs" value="S1S2+, no murmur">
-        </div>
-        <div class="input-group">
-          <label>CNS</label>
-          <input type="text" id="exam-cns" value="Conscious, orientated">
-        </div>
-        <div class="input-group">
-          <label>P/A <span class="exam-pill" onclick="appendExam('exam-pa', 'Guarding +')">+ Guarding</span> <span class="exam-pill" onclick="appendExam('exam-pa', 'Rigidity +')">+ Rigidity</span></label>
-          <input type="text" id="exam-pa" value="Soft and NT">
+
+        <div style="display: flex; flex-direction: column; gap: 12px; padding-left: 5px;">
+          <div class="input-group">
+            <label>RS <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Ronchi')">+ Ronchi</span> <span class="exam-pill" onclick="appendExam('exam-rs', 'B/L Creps')">+ Creps</span></label>
+            <input type="text" id="exam-rs" class="arrow-nav-right" value="BSBE, clear">
+          </div>
+          <div class="input-group">
+            <label>CVS <span class="exam-pill" onclick="appendExam('exam-cvs', 'Murmur +')">+ Murmur</span></label>
+            <input type="text" id="exam-cvs" class="arrow-nav-right" value="S1S2+, no murmur">
+          </div>
+          <div class="input-group"><label>CNS</label><input type="text" id="exam-cns" class="arrow-nav-right" value="Conscious, orientated"></div>
+          <div class="input-group">
+            <label>P/A <span class="exam-pill" onclick="appendExam('exam-pa', 'Guarding +')">+ Guarding</span> <span class="exam-pill" onclick="appendExam('exam-pa', 'Rigidity +')">+ Rigidity</span></label>
+            <input type="text" id="exam-pa" class="arrow-nav-right" value="Soft and NT">
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="section">
+<div class="section">
       <h3>Investigations</h3>
-      <div class="grid-4">
-        <div class="input-group"><label>Hb (g/dL)</label><input type="text" id="lab-hb"></div>
-        <div class="input-group"><label>TC (cells/cumm)</label><input type="text" id="lab-tc"></div>
-        <div class="input-group"><label>Platelets (lakhs)</label><input type="text" id="lab-plt"></div>
-        <div class="input-group"><label>RBS / FBS (mg/dL)</label><input type="text" id="lab-rbs"></div>
-        <div class="input-group"><label>HbA1c (%)</label><input type="text" id="lab-hba1c"></div>
-        <div class="input-group"><label>S. Creat (mg/dL)</label><input type="text" id="lab-creat"></div>
-        <div class="input-group"><label>SGPT (U/L)</label><input type="text" id="lab-sgpt"></div>
-        <div class="input-group"><label>PT (sec)</label><input type="text" id="lab-pt"></div>
-        <div class="input-group"><label>INR</label><input type="text" id="lab-inr"></div>
-        <div class="input-group"><label>APTT (sec)</label><input type="text" id="lab-aptt"></div>
-        <div class="input-group"><label>TSH (µIU/mL)</label><input type="text" id="lab-tsh"></div>
-        <div class="input-group"><label>Urine Routine</label><input type="text" id="lab-urine" value="Noted"></div>
-      </div>
-      <div class="grid-3" style="margin-top: 15px;">
-        <div class="input-group"><label>ECG</label><input type="text" id="lab-ecg" value="WNL"></div>
-        <div class="input-group"><label>ECHO</label><input type="text" id="lab-echo" value="Noted"></div>
-        <div class="input-group"><label>CXR</label><input type="text" id="lab-cxr" value="Noted"></div>
+      <div class="grid-6">
+        <div class="compact-lab"><label>Hb</label><input type="text" id="lab-hb" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>TC</label><input type="text" id="lab-tc" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>Plt</label><input type="text" id="lab-plt" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>RBS</label><input type="text" id="lab-rbs" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>HBa1c</label><input type="text" id="lab-hba1c" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>S.Creat</label><input type="text" id="lab-creat" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>SGPT</label><input type="text" id="lab-sgpt" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>PT</label><input type="text" id="lab-pt" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>INR</label><input type="text" id="lab-inr" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>APTT</label><input type="text" id="lab-aptt" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>TSH</label><input type="text" id="lab-tsh" class="arrow-nav-lab"></div>
+        <div class="compact-lab"><label>Urine</label><input type="text" id="lab-urine" class="arrow-nav-lab" value="Noted"></div>
+        <div class="compact-lab"><label>ECG</label><input type="text" id="lab-ecg" class="arrow-nav-lab" value="WNL"></div>
+        <div class="compact-lab"><label>ECHO</label><input type="text" id="lab-echo" class="arrow-nav-lab" value="Noted"></div>
+        <div class="compact-lab"><label>CXR</label><input type="text" id="lab-cxr" class="arrow-nav-lab" value="Noted"></div>
       </div>
     </div>
   </div>
 
   <div class="right-pane">
     <h3 style="margin-bottom: 5px;">Fitness Advice & Remarks</h3>
-    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Fully editable text. Auto-updates based on selections.</p>
     
     <div id="advice-box" contenteditable="true" style="flex-grow: 1; border: 1px solid #cbd5e1; border-radius: 4px; padding: 12px; overflow-y: auto; background: #fff; line-height: 1.5; margin-bottom: 15px;"></div>
     
@@ -296,10 +308,9 @@
     <p id="p-systemic"></p>
   </div>
 
-  <div class="print-section" id="print-lab-section">
+<div class="print-section" id="print-lab-section">
     <h4>Investigations</h4>
-    <table class="lab-table" id="dynamic-lab-table">
-      </table>
+    <p id="p-labs" style="font-size: 0.80rem; line-height: 1.6; margin-top: 5px;"></p>
   </div>
 
   <div class="print-section" style="margin-top: 20px;">
@@ -309,12 +320,48 @@
 
   <div class="signature-block">
     <p style="font-weight: bold; font-size: 1.1rem;">Dr. Mit Panchani</p>
-    <p>MBBS, MD General Medicine, PGCIH</p>
-    <p>Fellow in 2D Echo</p>
+    <p>MBBS, MD General Medicine</p>
+    <p>Fellowship in 2D Echocariography, PGCIH</p>
   </div>
 </div>
 
 <script>
+    
+// ==========================================
+  // VERTICAL ARROW KEY NAVIGATION
+  // ==========================================
+  function enableVerticalArrowNav(className) {
+    const inputs = Array.from(document.querySelectorAll('.' + className));
+    inputs.forEach((input, index) => {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (index < inputs.length - 1) inputs[index + 1].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (index > 0) inputs[index - 1].focus();
+        }
+      });
+    });
+  }
+  
+  enableVerticalArrowNav('arrow-nav-left');
+  enableVerticalArrowNav('arrow-nav-right');
+
+  // 6-Column Grid Navigation for Labs (Up, Down, Left, Right)
+  function enableGridArrowNav(className, columns) {
+    const inputs = Array.from(document.querySelectorAll('.' + className));
+    inputs.forEach((input, index) => {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' && index < inputs.length - 1) { e.preventDefault(); inputs[index + 1].focus(); }
+        else if (e.key === 'ArrowLeft' && index > 0) { e.preventDefault(); inputs[index - 1].focus(); }
+        else if (e.key === 'ArrowDown' && index + columns < inputs.length) { e.preventDefault(); inputs[index + columns].focus(); }
+        else if (e.key === 'ArrowUp' && index - columns >= 0) { e.preventDefault(); inputs[index - columns].focus(); }
+      });
+    });
+  }
+  
+  enableGridArrowNav('arrow-nav-lab', 6);
 
 // ==========================================
   // BP SMART AUTO-FORMATTER
@@ -567,9 +614,6 @@ window.addEventListener('load', loadDraft);
     saveDraft();
   }
 
-  // Run on load to set default advice text
-  generateAdvice();
-
   // Dynamic Print Preparation
   function preparePrint() {
     // 1. Demographics
@@ -582,30 +626,35 @@ window.addEventListener('load', loadDraft);
        document.getElementById('p-date').innerText = dateObj.toLocaleDateString('en-GB'); 
     }
     document.getElementById('p-ot').innerText = document.getElementById('pt-ot').value || "---------";
-
-    // 2. KCO, T/T & Medicines Not Brought (Same Line)
+    
+// 2. KCO, T/T & Medicines Not Brought
     let kcoChecked = Array.from(document.querySelectorAll('.kco-check:checked')).map(el => el.value);
-    let otherKco = document.getElementById('kco-other').value.trim();
-    if (otherKco) kcoChecked.push(otherKco);
     
     let kcoString = kcoChecked.length > 0 ? "KCO " + kcoChecked.join(", ") : "No significant past medical history";
     
-    // Check Radio button status for T/T
     if (kcoChecked.length > 0) {
-      if (document.getElementById('on-tt').checked) {
-        kcoString += ". Patient is on regular T/T.";
-      } else if (document.getElementById('off-tt').checked) {
-        kcoString += ". Patient is NOT on regular T/T.";
-      }
+      if (document.getElementById('on-tt') && document.getElementById('on-tt').checked) kcoString += ". Patient is on regular T/T.";
+      else if (document.getElementById('off-tt') && document.getElementById('off-tt').checked) kcoString += ". Patient is NOT on regular T/T.";
     }
     
-    // Append Meds Not Brought
-    if (document.getElementById('meds-not-brought').checked) {
+    if (document.getElementById('meds-not-brought') && document.getElementById('meds-not-brought').checked) {
       kcoString += " Medicines not brought.";
     }
-    
-    document.getElementById('p-kco').innerText = kcoString;
 
+   // Add Other History
+    let otherKco = document.getElementById('kco-other') ? document.getElementById('kco-other').value.trim() : "";
+    if (otherKco) {
+      kcoString += `<br><br><b>Other Medical/Surgical History:</b> ${otherKco}`;
+    }
+
+    // Add Docs Not Available Check
+    if (document.getElementById('docs-not-avail') && document.getElementById('docs-not-avail').checked) {
+      kcoString += "<br><br><b>Note:</b> Old medical documents/records are not available.";
+    }
+
+ 
+    document.getElementById('p-kco').innerHTML = kcoString;
+    
     // 3. Dynamic Vitals
     let vitals = [];
     let getV = (id, label, unit) => { let v = document.getElementById(id).value.trim(); if(v) vitals.push(`<b>${label}:</b> ${v} ${unit}`); };
@@ -627,33 +676,21 @@ window.addEventListener('load', loadDraft);
     
     document.getElementById('p-systemic').innerHTML = sys.join(' &nbsp;|&nbsp; ');
 
-    // 5. Dynamic Lab Table
+   // 5. Ultra-Compact Dynamic Labs
     const allLabs = [
-      { id: 'lab-hb', label: 'Hb' }, { id: 'lab-tc', label: 'TC' }, { id: 'lab-plt', label: 'Platelets' },
-      { id: 'lab-rbs', label: 'RBS / FBS' }, { id: 'lab-hba1c', label: 'HbA1c' }, { id: 'lab-creat', label: 'S. Creat' },
-      { id: 'lab-sgpt', label: 'SGPT' }, { id: 'lab-tsh', label: 'TSH' }, { id: 'lab-urine', label: 'Urine R/M' },
-      { id: 'lab-pt', label: 'PT' }, { id: 'lab-inr', label: 'INR' }, { id: 'lab-aptt', label: 'APTT' },
+      { id: 'lab-hb', label: 'Hb' }, { id: 'lab-tc', label: 'TC' }, { id: 'lab-plt', label: 'Plt' },
+      { id: 'lab-rbs', label: 'RBS' }, { id: 'lab-hba1c', label: 'HbA1c' }, { id: 'lab-creat', label: 'Cr' },
+      { id: 'lab-sgpt', label: 'SGPT' }, { id: 'lab-pt', label: 'PT' }, { id: 'lab-inr', label: 'INR' },
+      { id: 'lab-aptt', label: 'APTT' }, { id: 'lab-tsh', label: 'TSH' }, { id: 'lab-urine', label: 'Urine' },
       { id: 'lab-ecg', label: 'ECG' }, { id: 'lab-echo', label: 'ECHO' }, { id: 'lab-cxr', label: 'CXR' }
     ];
 
-    let activeLabs = allLabs.map(lab => ({ label: lab.label, val: document.getElementById(lab.id).value.trim() })).filter(lab => lab.val !== "");
+    let activeLabs = allLabs.map(lab => {
+      let val = document.getElementById(lab.id).value.trim();
+      return val ? `<b>${lab.label}:</b> ${val}` : null;
+    }).filter(val => val !== null);
 
-    let tableHTML = "";
-    if (activeLabs.length === 0) {
-      tableHTML = "<tr><td>No investigations recorded.</td></tr>";
-    } else {
-      for (let i = 0; i < activeLabs.length; i += 2) {
-        tableHTML += "<tr>";
-        tableHTML += `<th>${activeLabs[i].label}</th><td>${activeLabs[i].val}</td>`;
-        if (i + 1 < activeLabs.length) {
-          tableHTML += `<th>${activeLabs[i+1].label}</th><td>${activeLabs[i+1].val}</td>`;
-        } else {
-          tableHTML += `<th></th><td></td>`; 
-        }
-        tableHTML += "</tr>";
-      }
-    }
-    document.getElementById('dynamic-lab-table').innerHTML = tableHTML;
+    document.getElementById('p-labs').innerHTML = activeLabs.length > 0 ? activeLabs.join(' &nbsp;|&nbsp; ') : "No investigations recorded.";
 
     // 6. Advice
     document.getElementById('p-advice').innerHTML = document.getElementById('advice-box').innerHTML;
