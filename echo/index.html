@@ -57,6 +57,47 @@
     .ig label { font-size: .7rem; font-weight: 700; color: #64748b; white-space: nowrap; }
     .ig input, .ig select { padding: 4px; border: 1px solid var(--border); border-radius: 4px; font-size: .85rem; text-align: center; width: 100%; transition: .2s; }
     .ig input[type="text"]:not(.auto-calc) { text-align: left; }
+   
+   /* =========================================
+       UI TABLE GRID STYLES (EXCEL-LIKE ENTRY)
+       ========================================= */
+    .ui-table-container {
+      background: var(--border); /* Acts as the border color between cells */
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .ui-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
+    .ui-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; }
+    
+    .ui-cell { display: flex; background: #fff; }
+    .ui-cell label {
+      background: #f1f5f9;
+      padding: 6px 10px;
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #475569;
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      width: 105px; /* Fixed width so all columns perfectly align */
+      flex-shrink: 0;
+    }
+    .ui-cell input, .ui-cell select {
+      border: none;
+      padding: 8px;
+      font-size: 0.85rem;
+      width: 100%;
+      border-radius: 0;
+      outline: none;
+      text-align: center;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .ui-cell input:focus, .ui-cell select:focus { background: #e0f2fe; }
+    .ui-cell input.auto-calc { background: #f8fafc; color: var(--accent); }
     .auto-calc { background: #f1f5f9; font-weight: 700; color: var(--accent); }
     button { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: .85rem; }
     .btn-small { padding: 4px 8px; font-size: .75rem; border-radius: 4px; }
@@ -97,8 +138,8 @@
       #print-layout-1page .pt-info-row { display: flex; justify-content: space-between; align-items: center; }
       #print-layout-1page .dyn-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 8px; }
       #print-layout-1page .dyn-table td { padding: 2px 4px; vertical-align: middle; border: 1px solid #000; font-size: 9.5pt; line-height: 1.1; }
-      #print-layout-1page .dyn-table td.lbl { font-weight: 400; color: #222; width: 25%; }
-      #print-layout-1page .dyn-table td.val { font-weight: 700; white-space: nowrap; width: 25%; }
+   #print-layout-1page .dyn-table td.lbl { font-weight: 400; color: #222; width: 12%; padding-right: 2px; }
+      #print-layout-1page .dyn-table td.val { font-weight: 700; white-space: nowrap; width: 8%; text-align: center; }
       #print-layout-1page .section-title { font-weight: 700; text-decoration: underline; margin: 8px 0 4px 0; font-size: 10.5pt; }
       #print-layout-1page .conclusion-text { margin-top: 4px; line-height: 1.35; font-size: 10.5pt; }
       #print-layout-1page .print-footer { margin-top: 15px; text-align: left; font-weight: 700; line-height: 1.2; font-size: 10pt; }
@@ -114,9 +155,8 @@
       #print-layout-2page .disclaimer { padding-top: 10px; font-size: 8.5pt; line-height: 1.3; }
       #print-layout-2page .dyn-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 15px; }
       #print-layout-2page .dyn-table td { padding: 4px 6px; vertical-align: middle; border: 1px solid #000; font-size: 10.5pt; }
-      #print-layout-2page .dyn-table td.lbl { font-weight: 400; color: #222; width: 25%; }
-      #print-layout-2page .dyn-table td.val { font-weight: 700; white-space: nowrap; width: 25%; }
-      #print-layout-2page .rwma-container { gap: 15px; padding: 0; margin-bottom: 10px; display: flex; justify-content: center; }
+#print-layout-2page .dyn-table td.lbl { font-weight: 400; color: #222; width: 12%; padding-right: 2px; }
+      #print-layout-2page .dyn-table td.val { font-weight: 700; white-space: nowrap; width: 8%; text-align: center; }      #print-layout-2page .rwma-container { gap: 15px; padding: 0; margin-bottom: 10px; display: flex; justify-content: center; }
       #print-layout-2page .rwma-container svg { height: 160px; width: auto; }
       #print-layout-2page .rwma-container > div > div { font-size: 10pt !important; margin-bottom: 4px !important; }
       #print-layout-2page .rwma-legend { font-size: 9pt; margin-top: 5px; margin-bottom: 15px; display: flex; justify-content: center; gap: 15px; }
@@ -235,7 +275,83 @@
         </div>
       </div>
 
-      <div class="panel" id="rwma-master-container">
+     <div class="panel">
+        <h3>Dimensions</h3>
+        <div class="ui-table-container">
+          
+          <div class="ui-grid-3" style="border-bottom: 1px solid var(--border);">
+            <div class="ui-cell"><label>IVSd (mm)</label><input type="number" step="0.1" id="ivsd" class="print-dim live-input arrow-nav-dim3" data-lbl="IVSd (mm)"></div>
+            <div class="ui-cell"><label>IVSs (mm)</label><input type="number" step="0.1" id="ivss" class="print-dim live-input arrow-nav-dim3" data-lbl="IVSs (mm)"></div>
+            <div class="ui-cell"><label>Ao (mm)</label><input type="number" step="0.1" id="ao" class="print-dim live-input arrow-nav-dim3" data-lbl="Ao (mm)"></div>
+
+            <div class="ui-cell"><label>LVDd (mm)</label><input type="number" step="0.1" id="lvdd" class="print-dim live-input arrow-nav-dim3" data-lbl="LVDd (mm)"></div>
+            <div class="ui-cell"><label>LVDs (mm)</label><input type="number" step="0.1" id="lvds" class="print-dim live-input arrow-nav-dim3" data-lbl="LVDs (mm)"></div>
+            <div class="ui-cell"><label>LA (mm)</label><input type="number" step="0.1" id="la" class="print-dim live-input arrow-nav-dim3" data-lbl="LA (mm)"></div>
+
+            <div class="ui-cell"><label>LVPWd (mm)</label><input type="number" step="0.1" id="lvpwd" class="print-dim live-input arrow-nav-dim3" data-lbl="LVPWd (mm)"></div>
+            <div class="ui-cell"><label>LVPWs (mm)</label><input type="number" step="0.1" id="lvpws" class="print-dim live-input arrow-nav-dim3" data-lbl="LVPWs (mm)"></div>
+            <div class="ui-cell"><label>LA/Ao</label><input type="text" id="laao" class="print-dim auto-calc arrow-nav-dim3" data-lbl="LA/Ao" readonly></div>
+
+            <div class="ui-cell"><label>LVEF (%)</label><input type="number" id="ef" class="print-dim live-input arrow-nav-dim3" data-lbl="LVEF (%)"></div>
+            <div class="ui-cell"><label>RA (mm)</label><input type="number" id="ra" class="print-dim live-input arrow-nav-dim3" data-lbl="RA Size (mm)"></div>
+            <div class="ui-cell"><label>RV (mm)</label><input type="number" id="rv" class="print-dim live-input arrow-nav-dim3" data-lbl="RV Size (mm)"></div>
+          </div>
+          
+          <div class="ui-grid-4">
+            <div class="ui-cell"><label>EPSS (mm)</label><input type="number" id="epss" class="print-dim live-input arrow-nav-dim4" data-lbl="EPSS (mm)"></div>
+            <div class="ui-cell"><label>MPA (mm)</label><input type="number" id="mpa" class="print-dim live-input arrow-nav-dim4" data-lbl="MPA (mm)"></div>
+            <div class="ui-cell"><label>RPA (mm)</label><input type="number" id="rpa" class="print-dim live-input arrow-nav-dim4" data-lbl="RPA (mm)"></div>
+            <div class="ui-cell"><label>LPA (mm)</label><input type="number" id="lpa" class="print-dim live-input arrow-nav-dim4" data-lbl="LPA (mm)"></div>
+          </div>
+          
+        </div>
+      </div>
+
+     <div class="panel">
+        <h3>Doppler & Valves</h3>
+        
+        <div class="ui-table-container">
+          <div class="ui-grid-4">
+            
+            <div class="ui-cell"><label>MV E (m/s)</label><input type="number" step="0.01" id="mv-e" class="print-dop live-input arrow-nav-dop4" data-lbl="MV Peak E (m/s)"></div>
+            <div class="ui-cell"><label>AV Vmax (m/s)</label><input type="number" step="0.01" id="av-v" class="print-dop live-input arrow-nav-dop4" data-lbl="AV Vmax (m/s)"></div>
+            <div class="ui-cell"><label>AV Max PG mmHg</label><input type="text" id="av-pg" class="print-dop auto-calc arrow-nav-dop4" data-lbl="AV Max PG" readonly></div>
+            <div class="ui-cell"><label>AR</label><select id="val-ar" class="live-input arrow-nav-dop4" data-lbl="AR"><option value="None">None</option><option value="Trace">Trace</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
+            
+            <div class="ui-cell"><label>MV A (m/s)</label><input type="number" step="0.01" id="mv-a" class="print-dop live-input arrow-nav-dop4" data-lbl="MV Peak A (m/s)"></div>
+            <div class="ui-cell"><label>PV Vmax (m/s)</label><input type="number" step="0.01" id="pv-v" class="print-dop live-input arrow-nav-dop4" data-lbl="PV Vmax (m/s)"></div>
+            <div class="ui-cell"><label>PV Max PG mmHg</label><input type="text" id="pv-pg" class="print-dop auto-calc arrow-nav-dop4" data-lbl="PV Max PG" readonly></div>
+            <div class="ui-cell"><label>PR</label><select id="val-pr" class="live-input arrow-nav-dop4" data-lbl="PR"><option value="None">None</option><option value="Trace">Trace</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
+            
+            <div class="ui-cell"><label>E/A Ratio</label><input type="text" id="ea" class="print-dop auto-calc arrow-nav-dop4" data-lbl="E/A Ratio" readonly></div>
+            <div class="ui-cell"><label>TR Vmax (m/s)</label><input type="number" step="0.01" id="tr-v" class="print-dop live-input arrow-nav-dop4" data-lbl="TR Vmax (m/s)"></div>
+            <div class="ui-cell"><label>TR Max PG mmHg</label><input type="text" id="tr-pg" class="print-dop auto-calc arrow-nav-dop4" data-lbl="TR Max PG" readonly></div>
+            <div class="ui-cell"></div>
+            
+            <div class="ui-cell"><label>Lat E/e'</label><input type="number" step="0.1" id="ee" class="print-dop live-input arrow-nav-dop4" data-lbl="E/e' Ratio"></div>
+            <div class="ui-cell"><label>MV Mean PG</label><input type="number" id="mv-mpg" class="print-dop live-input arrow-nav-dop4" data-lbl="MV Mean PG"></div>
+            <div class="ui-cell"><label>MV Peak PG</label><input type="number" id="mv-ppg" class="print-dop live-input arrow-nav-dop4" data-lbl="MV Peak PG"></div>
+            <div class="ui-cell"><label>MR</label><select id="val-mr" class="live-input arrow-nav-dop4" data-lbl="MR"><option value="None">None</option><option value="Trace">Trace</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
+
+            <div class="ui-cell"><label>RVSP mmHg</label><input type="number" id="rvsp" class="print-dop live-input arrow-nav-dop4" data-lbl="RVSP (mmHg)"></div>
+            <div class="ui-cell"><label>TAPSE (mm)</label><input type="number" id="tapse" class="print-dop live-input arrow-nav-dop4" data-lbl="TAPSE (mm)"></div>
+            <div class="ui-cell"><label>IVC (mm)</label><input type="number" id="ivc" class="print-dop live-input arrow-nav-dop4" data-lbl="IVC (mm)"></div>
+            <div class="ui-cell"><label>HR (bpm)</label><input type="number" id="hr" class="print-dim live-input arrow-nav-dop4" data-lbl="HR (bpm)"></div>
+          
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 5px;">
+          <div class="flex-row" style="align-items:center;">
+            <div class="ig ig-med"><label>Custom Name</label><input type="text" id="cust-lbl" class="live-input arrow-nav-cust" placeholder="e.g., MV VTI"></div>
+            <div class="ig ig-med"><label>Custom Value</label><input type="text" id="cust-val" class="print-dop custom-val live-input arrow-nav-cust" data-lbl-target="cust-lbl" placeholder="e.g., 15 cm" onkeydown="if(event.key === 'Enter') addCustomField()"></div>
+            <button class="btn-small" onclick="addCustomField()" style="margin-top:15px; margin-left:5px">+ Add</button>
+          </div>
+          <div id="custom-container" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+       <div class="panel" id="rwma-master-container">
         <h3><span>Visual RWMA Mapper (17-Segment)</span><div><button class="btn-red btn-small" onclick="clearRWMA()">↺ Reset Map</button></div></h3>
         <div class="rwma-container" id="source-rwma">
           <div style="text-align:center"><div style="font-size:.8rem; font-weight:700; color:var(--accent); margin-bottom:5px">PSAX View</div><svg id="svg-psax" width="220" height="220" viewBox="0 0 220 220"></svg></div>
@@ -249,83 +365,8 @@
           <div><span class="leg-box" style="background:#fca5a5"></span>Dyskinetic</div>
         </div>
       </div>
-
-      <div class="panel">
-        <h3>LV Dimensions & Function</h3>
-        <div class="flex-row" style="align-items:center">
-          <div class="ig"><label>IVSd</label><input type="number" step="0.1" id="ivsd" class="print-dim live-input" data-lbl="IVSd (mm)"></div>
-          <div class="ig"><label>LVDd</label><input type="number" step="0.1" id="lvdd" class="print-dim live-input" data-lbl="LVDd (mm)"></div>
-          <div class="ig"><label>LVPWd</label><input type="number" step="0.1" id="lvpwd" class="print-dim live-input" data-lbl="LVPWd (mm)"></div>
-          <div class="ig" style="margin-left:10px"><label>IVSs</label><input type="number" step="0.1" id="ivss" class="print-dim live-input" data-lbl="IVSs (mm)"></div>
-          <div class="ig"><label>LVDs</label><input type="number" step="0.1" id="lvds" class="print-dim live-input" data-lbl="LVDs (mm)"></div>
-          <div class="ig"><label>LVPWs</label><input type="number" step="0.1" id="lvpws" class="print-dim live-input" data-lbl="LVPWs (mm)"></div>
-          <div class="v-divider"></div>
-          <div class="ig"><label>LVEF (%)</label><input type="number" id="ef" class="print-dim live-input" data-lbl="LVEF (%)"></div>
-          <div class="ig"><label>EPSS (mm)</label><input type="number" id="epss" class="print-dim live-input" data-lbl="EPSS (mm)"></div>
-          <div class="ig"><label>HR (bpm)</label><input type="number" id="hr" class="print-dim live-input" data-lbl="HR (bpm)"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3>Chambers & Great Vessels</h3>
-        <div class="flex-row" style="align-items:center">
-          <div class="ig"><label>Ao (mm)</label><input type="number" step="0.1" id="ao" class="print-dim live-input" data-lbl="Ao (mm)"></div>
-          <div class="ig"><label>LA (mm)</label><input type="number" step="0.1" id="la" class="print-dim live-input" data-lbl="LA (mm)"></div>
-          <div class="ig"><label>LA/Ao</label><input type="text" id="laao" class="print-dim auto-calc" data-lbl="LA/Ao" readonly></div>
-          <div class="v-divider"></div>
-          <div class="ig"><label>RA (mm)</label><input type="number" id="ra" class="print-dim live-input" data-lbl="RA Size (mm)"></div>
-          <div class="ig"><label>RV (mm)</label><input type="number" id="rv" class="print-dim live-input" data-lbl="RV Size (mm)"></div>
-          <div class="v-divider"></div>
-          <div class="ig"><label>MPA (mm)</label><input type="number" id="mpa" class="print-dim live-input" data-lbl="MPA (mm)"></div>
-          <div class="ig"><label>LPA (mm)</label><input type="number" id="lpa" class="print-dim live-input" data-lbl="LPA (mm)"></div>
-          <div class="ig"><label>RPA (mm)</label><input type="number" id="rpa" class="print-dim live-input" data-lbl="RPA (mm)"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3>Doppler</h3>
-        <div class="valve-box">
-          <div class="valve-title">Mitral Valve</div>
-          <div class="flex-row">
-            <div class="ig"><label>MV E (m/s)</label><input type="number" step="0.01" id="mv-e" class="print-dop live-input" data-lbl="MV Peak E (m/s)"></div>
-            <div class="ig"><label>MV A (m/s)</label><input type="number" step="0.01" id="mv-a" class="print-dop live-input" data-lbl="MV Peak A (m/s)"></div>
-            <div class="ig"><label>E/A Ratio</label><input type="text" id="ea" class="print-dop auto-calc" data-lbl="E/A Ratio" readonly></div>
-            <div class="ig"><label>E/e' Ratio</label><input type="number" step="0.1" id="ee" class="print-dop live-input" data-lbl="E/e' Ratio"></div>
-            <div class="ig"><label>Mean PG</label><input type="number" id="mv-mpg" class="print-dop live-input" data-lbl="MV Mean PG"></div>
-            <div class="ig"><label>Peak PG</label><input type="number" id="mv-ppg" class="print-dop live-input" data-lbl="MV Peak PG"></div>
-            <div class="ig ig-med"><label>MR Regurg.</label><select id="val-mr" class="live-input"><option value="None">None</option><option value="Trace">Trace</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
-          </div>
-        </div>
-        <div class="valve-box">
-          <div class="valve-title">Aortic, Pulmonary & Tricuspid Valves</div>
-          <div class="flex-row" style="align-items:center">
-            <div class="ig"><label>AV Vmax (m/s)</label><input type="number" step="0.01" id="av-v" class="print-dop live-input" data-lbl="AV Vmax (m/s)"></div>
-            <div class="ig"><label>AV Max PG</label><input type="text" id="av-pg" class="print-dop auto-calc" data-lbl="AV Max PG" readonly></div>
-            <div class="ig"><label>AR</label><select id="val-ar" class="live-input"><option value="None">None</option><option value="Trace">Trace</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
-            <div class="v-divider"></div>
-            <div class="ig"><label>PV Vmax (m/s)</label><input type="number" step="0.01" id="pv-v" class="print-dop live-input" data-lbl="PV Vmax (m/s)"></div>
-            <div class="ig"><label>PV Max PG</label><input type="text" id="pv-pg" class="print-dop auto-calc" data-lbl="PV Max PG" readonly></div>
-            <div class="ig"><label>PR</label><select id="val-pr" class="live-input"><option value="None">None</option><option value="Trace">Trace</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
-            <div class="v-divider"></div>
-            <div class="ig"><label>TR Vmax (m/s)</label><input type="number" step="0.01" id="tr-v" class="print-dop live-input" data-lbl="TR Vmax (m/s)"></div>
-            <div class="ig"><label>TR Max PG</label><input type="text" id="tr-pg" class="print-dop auto-calc" data-lbl="TR Max PG" readonly></div>
-          </div>
-        </div>
-        <div class="valve-box">
-          <div class="valve-title">Pressures, Right Heart & Custom</div>
-          <div class="flex-row" style="align-items:center">
-            <div class="ig"><label>RVSP (mmHg)</label><input type="number" id="rvsp" class="print-dop live-input" data-lbl="RVSP (mmHg)"></div>
-            <div class="ig"><label>TAPSE (mm)</label><input type="number" id="tapse" class="print-dop live-input" data-lbl="TAPSE (mm)"></div>
-            <div class="ig"><label>IVC (mm)</label><input type="number" id="ivc" class="print-dop live-input" data-lbl="IVC (mm)"></div>
-            <div class="v-divider"></div>
-            <div class="ig ig-med"><label>Custom Name</label><input type="text" id="cust-lbl" class="live-input" placeholder="e.g., MV VTI"></div>
-            <div class="ig ig-med"><label>Custom Value</label><input type="text" id="cust-val" class="print-dop custom-val live-input" data-lbl-target="cust-lbl" placeholder="e.g., 15 cm"></div>
-            <button class="btn-small" onclick="addCustomField()" style="margin-top:15px; margin-left:5px">+ Add</button>
-          </div>
-          <div id="custom-container" style="margin-top:8px"></div>
-        </div>
-      </div>
-    </div>
+      
+</div>
 
 <div class="conclusion-section panel">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -820,11 +861,12 @@ document.getElementById('conclusion').addEventListener('keydown', function(e) {
   });
 
   // ==========================================
-  // PRINT ENGINE LOGIC
+  // PRINT ENGINE LOGIC (UPGRADED TO 4 COLUMNS)
   // ==========================================
   function build3ColTable(selector) {
     const inputs = document.querySelectorAll(selector);
     let validData = [];
+    
     inputs.forEach(el => {
       if (el.value.trim() !== '') {
         let lbl = el.getAttribute('data-lbl');
@@ -832,17 +874,29 @@ document.getElementById('conclusion').addEventListener('keydown', function(e) {
         validData.push({ lbl: lbl, val: el.value });
       }
     });
+    
     if (validData.length === 0) return '<p><i>No measurements entered.</i></p>';
+    
     let html = '<table class="dyn-table">';
-    for (let i = 0; i < validData.length; i += 3) {
-      html += `<tr><td class="lbl">${validData[i].lbl}</td><td class="val">${validData[i].val}</td>`;
-      if (validData[i + 1]) html += `<td class="lbl">${validData[i + 1].lbl}</td><td class="val">${validData[i + 1].val}</td>`; else html += `<td class="lbl"></td><td class="val"></td>`;
-      if (validData[i + 2]) html += `<td class="lbl">${validData[i + 2].lbl}</td><td class="val">${validData[i + 2].val}</td>`; else html += `<td class="lbl"></td><td class="val"></td>`;
+    const colsPerRow = 4; // Set to 4 items per row for maximum space efficiency
+    
+    for (let i = 0; i < validData.length; i += colsPerRow) {
+      html += `<tr>`;
+      
+      // Smart loop to dynamically generate exactly 4 pairs of cells
+      for (let j = 0; j < colsPerRow; j++) {
+        if (validData[i + j]) {
+          html += `<td class="lbl">${validData[i + j].lbl}</td><td class="val">${validData[i + j].val}</td>`;
+        } else {
+          // If we run out of data, pad the rest of the row with invisible boxes
+          html += `<td class="lbl" style="border: none;"></td><td class="val" style="border: none;"></td>`;
+        }
+      }
       html += '</tr>';
     }
+    
     return html + '</table>';
   }
-
   window.addEventListener('beforeprint', () => {
     let hasRwma = false;
     document.querySelectorAll('.rwma-path').forEach(p => { if (p.getAttribute('data-val') !== 'N') hasRwma = true; });
@@ -882,6 +936,41 @@ document.getElementById('conclusion').addEventListener('keydown', function(e) {
       document.getElementById('p-conclusion-1').innerHTML = document.getElementById('conclusion').innerHTML;
     }
   });
+
+// ==========================================
+  // GRID ARROW KEY NAVIGATION
+  // ==========================================
+  function enableGridArrowNav(className, columns) {
+    const inputs = Array.from(document.querySelectorAll('.' + className));
+    inputs.forEach((input, index) => {
+      input.addEventListener('keydown', function(e) {
+        
+        // Let standard Up/Down arrows work normally inside Dropdown Menus
+        if (e.target.tagName === 'SELECT' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+          return; 
+        }
+
+        if (e.key === 'ArrowRight' && index < inputs.length - 1) { 
+            e.preventDefault(); inputs[index + 1].focus(); 
+        }
+        else if (e.key === 'ArrowLeft' && index > 0) { 
+            e.preventDefault(); inputs[index - 1].focus(); 
+        }
+        else if (e.key === 'ArrowDown' && index + columns < inputs.length) { 
+            e.preventDefault(); inputs[index + columns].focus(); 
+        }
+        else if (e.key === 'ArrowUp' && index - columns >= 0) { 
+            e.preventDefault(); inputs[index - columns].focus(); 
+        }
+      });
+    });
+  }
+
+  // Activate the different grid matrices based on their physical column layout
+  enableGridArrowNav('arrow-nav-dim3', 3);
+  enableGridArrowNav('arrow-nav-dim4', 4);
+  enableGridArrowNav('arrow-nav-dop4', 4);
+  enableGridArrowNav('arrow-nav-cust', 2);
 
 </script>
 </body>
